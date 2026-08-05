@@ -1,6 +1,8 @@
-# Semana 01 – Inicio, diagnóstico y arquitectura distribuida
+# Semana 01 - Inicio y arquitectura distribuida
 
 **Fecha:** 5 de agosto de 2026 · **Fase 1**
+
+**Material de estudio:** [Marco teórico ampliado](marco-teorico.md)
 
 ## Pregunta guía
 
@@ -24,11 +26,10 @@
 
 ## Actividad de clase
 
-1. Diagnóstico individual.
-2. Formación de grupos de 3.
-3. Selección de una necesidad del contexto.
-4. Identificación de variable física, sensor, salida y usuario.
-5. Diagrama de bloques preliminar.
+1. Formación de grupos de 3.
+2. Selección de una necesidad del contexto.
+3. Identificación de variable física, sensor, salida y usuario.
+4. Diagrama de bloques preliminar.
 
 ## Evidencia ABP
 

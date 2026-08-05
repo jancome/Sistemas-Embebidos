@@ -2,6 +2,8 @@
 
 **Fecha:** 28 de octubre de 2026 · **Contenidos 3.3 y 3.4 del syllabus**
 
+**Material de estudio:** [Marco teórico ampliado](marco-teorico.md)
+
 ## Pregunta guía
 
 ¿Cómo administrar remotamente el SBC y organizar una aplicación de alto nivel?

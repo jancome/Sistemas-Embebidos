@@ -2,6 +2,8 @@
 
 **Fecha:** 23 de septiembre de 2026 · **Contenido 2.4 del syllabus**
 
+**Material de estudio:** [Marco teórico ampliado](marco-teorico.md)
+
 ## Pregunta guía
 
 ¿Qué diferencias eléctricas, de alcance, consumo, topología y operación existen entre Wi-Fi y Bluetooth/BLE?

@@ -2,6 +2,8 @@
 
 **Fecha:** 2 de septiembre de 2026 · **Fase 1**
 
+**Material de estudio:** [Marco teórico ampliado](marco-teorico.md)
+
 ## Pregunta guía
 
 ¿Qué documentación permite fabricar, ensamblar y revisar una placa sin depender de explicaciones verbales?

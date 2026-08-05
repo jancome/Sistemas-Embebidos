@@ -61,6 +61,7 @@ Esta situación contextualiza la gran pregunta institucional: **¿Cómo desarrol
 - [Mapa del curso](MAPA_DEL_CURSO.md)
 - [Cronograma 2026-2](CRONOGRAMA_2026_2.md)
 - [Semanas de clase](semanas/README.md)
+- [Marcos teóricos semanales](semanas/README.md), con fundamentos, ecuaciones, ejemplos, laboratorio, diagnóstico y referencias primarias.
 - [Estrategia ABP](ABP_PROYECTO_DE_CURSO.md)
 - [Evaluación](EVALUACION.md)
 - [Proyecto final](PROYECTO_FINAL.md)

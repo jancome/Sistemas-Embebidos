@@ -2,6 +2,8 @@
 
 **Fecha:** 16 de septiembre de 2026 · **Fase 2**
 
+**Material de estudio:** [Marco teórico ampliado](marco-teorico.md)
+
 ## Pregunta guía
 
 ¿Cómo verificar que una comunicación SPI cumple niveles, temporización y formato de datos?

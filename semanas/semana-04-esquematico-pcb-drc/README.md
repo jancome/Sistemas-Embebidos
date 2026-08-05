@@ -2,6 +2,8 @@
 
 **Fecha:** 26 de agosto de 2026 · **Fase 1**
 
+**Material de estudio:** [Marco teórico ampliado](marco-teorico.md)
+
 ## Pregunta guía
 
 ¿Cómo convertir la arquitectura en una placa fabricable, verificable y mantenible?

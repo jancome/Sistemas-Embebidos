@@ -2,6 +2,8 @@
 
 **Fecha:** 12 de agosto de 2026 · **Fase 1**
 
+**Material de estudio:** [Marco teórico ampliado](marco-teorico.md)
+
 ## Pregunta guía
 
 ¿Cómo seleccionar sensores y actuadores a partir de requisitos medibles y no por disponibilidad o preferencia?

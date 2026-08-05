@@ -2,6 +2,8 @@
 
 **Fecha:** 19 de agosto de 2026 · **Fase 1**
 
+**Material de estudio:** [Marco teórico ampliado](marco-teorico.md)
+
 ## Pregunta guía
 
 ¿Cómo alimentar y proteger el nodo para que las mediciones y comunicaciones sean confiables?
