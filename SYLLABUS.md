@@ -16,11 +16,21 @@
 
 ## Propósito del curso
 
-Diseñar soluciones electrónicas programables para problemas reales mediante un nodo basado en microcontrolador y un computador de placa única como computador de borde. El estudiante recorrerá el ciclo de requerimientos, electrónica, PCB, firmware, comunicaciones, Linux, procesamiento, almacenamiento, visualización y operación robusta.
+Diseñar soluciones electrónicas programables para problemas reales mediante una placa base, un nodo basado en microcontrolador y un computador de placa única como computador de borde. El estudiante recorrerá el ciclo de requerimientos, electrónica, PCB, firmware, comunicaciones, Linux, procesamiento, almacenamiento, visualización y operación robusta.
 
-## Unidad 1 – Arquitectura y diseño de la placa base
+## Plataformas seleccionadas para desarrollar el syllabus
 
-**Resultado:** diseña la arquitectura y PCB de un nodo embebido, justificando sensores, actuadores, alimentación, regulación y protecciones; genera esquemático, PCB, Gerber, BOM y cotización.
+| Unidad / corte | Plataforma principal |
+|---|---|
+| Unidad 1 / Corte 1 | EasyEDA |
+| Unidad 2 / Corte 2 | ESP32 |
+| Unidad 3 / Corte 3 | Raspberry Pi 4 |
+
+EasyEDA se empleará para diseñar la placa base del ESP32. El ESP32 será programado y explotado como nodo embebido durante el segundo corte. La Raspberry Pi 4 actuará como SBC y computador de borde en el tercer corte.
+
+## Unidad 1 – Arquitectura y diseño de la placa base con EasyEDA
+
+**Resultado:** diseña en EasyEDA la arquitectura y PCB de un nodo embebido basado en ESP32, justificando sensores, actuadores, alimentación, regulación y protecciones; genera esquemático, PCB, Gerber, BOM y cotización.
 
 Contenidos:
 
@@ -28,15 +38,15 @@ Contenidos:
 2. Arquitectura del sistema embebido.
 3. Selección de sensores y actuadores.
 4. Alimentación, regulación y protecciones.
-5. Diseño esquemático.
+5. Diseño esquemático en EasyEDA.
 6. Diseño de PCB, footprints y DRC.
 7. Gerber, BOM y cotización.
-8. Placa base con microcontrolador.
+8. Placa base con ESP32.
 9. Preproyecto ABP 1.
 
-## Unidad 2 – Firmware, drivers y comunicaciones
+## Unidad 2 – Firmware, drivers y comunicaciones con ESP32
 
-**Resultado:** implementa firmware modular con drivers propios, RTOS y comunicaciones cableadas e inalámbricas para el intercambio de datos del proyecto.
+**Resultado:** implementa en ESP32 firmware modular con drivers propios, RTOS y comunicaciones cableadas e inalámbricas para el intercambio de datos del proyecto.
 
 Contenidos:
 
@@ -48,9 +58,9 @@ Contenidos:
 6. FreeRTOS: tareas, colas y sincronización.
 7. Preproyecto ABP 2.
 
-## Unidad 3 – Integración de microcontrolador y SBC
+## Unidad 3 – Integración de ESP32 y Raspberry Pi 4
 
-**Resultado:** integra el nodo con una Raspberry Pi 4 como computador de borde para recibir, procesar, almacenar y visualizar datos, manteniendo operación robusta ante fallas.
+**Resultado:** integra el nodo ESP32 con una Raspberry Pi 4 como computador de borde para recibir, procesar, almacenar y visualizar datos, manteniendo operación robusta ante fallas.
 
 Contenidos:
 
@@ -58,8 +68,8 @@ Contenidos:
 2. Raspberry Pi OS y fundamentos de Linux.
 3. Red y SSH.
 4. Python de alto nivel.
-5. GPIO de la Raspberry Pi.
-6. Comunicación ESP32–Raspberry Pi por UART, Wi-Fi, HTTP o MQTT.
+5. GPIO de la Raspberry Pi 4.
+6. Comunicación ESP32–Raspberry Pi 4 mediante UART, Wi-Fi, HTTP o MQTT.
 7. Recepción y procesamiento de datos.
 8. Base de datos local.
 9. Dashboard o interfaz web.
@@ -70,7 +80,8 @@ Contenidos:
 ## Competencias técnicas prioritarias
 
 - Especificar, analizar, diseñar y modelar prototipos embebidos.
-- Construir algoritmos y programas de ingeniería.
+- Diseñar esquemáticos y PCB fabricables en EasyEDA.
+- Construir algoritmos y programas de ingeniería sobre ESP32.
 - Consultar datasheets y documentación técnica.
 - Medir, probar, depurar y justificar decisiones electrónicas.
-- Integrar hardware, firmware, comunicaciones y software sobre Linux.
+- Integrar ESP32, comunicaciones y software sobre Raspberry Pi OS/Linux.
