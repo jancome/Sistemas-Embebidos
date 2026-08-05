@@ -1,4 +1,4 @@
-# Marco teórico – Semana 01
+# Marco teórico - Semana 01
 
 ## Sistemas embebidos, requisitos y arquitectura distribuida
 

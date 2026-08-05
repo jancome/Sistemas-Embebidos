@@ -4,7 +4,7 @@ Cada semana enlaza su ruta de clase y un marco teórico ampliado en español. Lo
 
 | Semana | Fecha | Ruta | Fase |
 |---:|---|---|---|
-| 1 | 5 agosto | [Inicio, diagnóstico y arquitectura](semana-01-inicio-diagnostico-arquitectura/README.md) · [Marco teórico](semana-01-inicio-diagnostico-arquitectura/marco-teorico.md) | Fase 1 |
+| 1 | 5 agosto | [Inicio y arquitectura](semana-01-inicio-arquitectura/README.md) · [Marco teórico](semana-01-inicio-arquitectura/marco-teorico.md) | Fase 1 |
 | 2 | 12 agosto | [Requerimientos, sensores y actuadores](semana-02-requerimientos-sensores-actuadores/README.md) · [Marco teórico](semana-02-requerimientos-sensores-actuadores/marco-teorico.md) | Fase 1 |
 | 3 | 19 agosto | [Alimentación, regulación y protecciones](semana-03-alimentacion-regulacion-protecciones/README.md) · [Marco teórico](semana-03-alimentacion-regulacion-protecciones/marco-teorico.md) | Fase 1 |
 | 4 | 26 agosto | [Esquemático, PCB y DRC](semana-04-esquematico-pcb-drc/README.md) · [Marco teórico](semana-04-esquematico-pcb-drc/marco-teorico.md) | Fase 1 |

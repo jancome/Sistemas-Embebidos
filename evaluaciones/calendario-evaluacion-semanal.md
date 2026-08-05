@@ -2,7 +2,7 @@
 
 | Semana | Fecha | Evaluación o avance |
 |---:|---|---|
-| 1 | 5 agosto | Diagnóstico, grupos y arquitectura inicial |
+| 1 | 5 agosto | Grupos, problema y arquitectura inicial |
 | 2 | 12 agosto | Matriz de requerimientos y selección electrónica |
 | 3 | 19 agosto | Alimentación, protecciones y mediciones |
 | 4 | 26 agosto | Quiz 1 + revisión de esquemático y PCB |
