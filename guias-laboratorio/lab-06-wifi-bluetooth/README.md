@@ -2,18 +2,25 @@
 
 ## Propósito
 
-Comparar y probar una tecnología inalámbrica en el nodo ESP32.
+Desarrollar experiencias básicas con Wi-Fi y con Bluetooth/BLE, y seleccionar la tecnología apropiada para el proyecto.
 
-## Procedimiento
+## Parte A – Wi-Fi
 
-1. Seleccionar Wi-Fi, Bluetooth Clásico o BLE.
-2. Configurar conexión.
-3. Enviar una medición.
-4. Registrar eventos de conexión.
-5. Interrumpir la comunicación.
-6. Verificar continuidad de la tarea local.
-7. Reconectar automáticamente.
+1. Configurar modo estación o punto de acceso.
+2. Verificar conexión y dirección IP.
+3. Enviar o recibir un dato.
+4. Interrumpir y recuperar la conexión.
+
+## Parte B – Bluetooth/BLE
+
+1. Configurar Bluetooth Clásico o BLE.
+2. Definir dispositivo, servicio o característica, según corresponda.
+3. Enviar o recibir un dato.
+4. Registrar conexión y desconexión.
 
 ## Evidencia
 
-Justificación, máquina de estados, código, captura de datos y prueba de reconexión.
+- Funcionamiento de Wi-Fi.
+- Funcionamiento de Bluetooth/BLE.
+- Tabla de comparación.
+- Selección justificada para el proyecto.

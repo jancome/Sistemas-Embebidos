@@ -1,33 +1,45 @@
 # Instalación de software
 
-## Cortes 1 y 2
+## Unidad 1 – Diseño de placa base
 
-1. Instalar Arduino IDE o el entorno definido por el docente.
-2. Instalar soporte oficial para ESP32.
-3. Verificar puerto, cable USB y carga de un programa de prueba.
-4. Instalar EasyEDA o KiCad.
-5. Crear cuenta o acceso a Wokwi para simulaciones.
-6. Instalar Git y Visual Studio Code para organización del código.
+Instalar o habilitar una herramienta EDA aprobada en el syllabus:
 
-## Corte 3
+- EasyEDA;
+- KiCad;
+- Proteus;
+- Altium, cuando exista licencia disponible.
+
+La herramienta debe permitir trabajar esquemático, footprints, PCB, DRC, Gerber y BOM.
+
+## Unidad 2 – Firmware y comunicaciones
+
+Instalar:
+
+1. Visual Studio Code u otro IDE compatible con el kit seleccionado.
+2. Toolchain del microcontrolador.
+3. Controladores USB requeridos.
+4. Bibliotecas para SPI, Wi-Fi, Bluetooth/BLE, HTTP/MQTT y RTOS.
+5. Monitor serial y herramientas de depuración.
+
+Cuando se utilice ESP32, pueden emplearse ESP-IDF, PlatformIO o Arduino IDE, según el nivel y la práctica definida.
+
+## Unidad 3 – Raspberry Pi 4
 
 1. Instalar Raspberry Pi Imager.
-2. Preparar Raspberry Pi OS y configurar usuario, red y SSH.
-3. Actualizar paquetes del sistema.
-4. Crear una carpeta de proyecto.
-5. Crear un entorno virtual de Python.
-6. Instalar dependencias dentro del entorno virtual.
-7. Verificar acceso a GPIO, serial y SQLite.
+2. Preparar Raspberry Pi OS.
+3. Configurar usuario, red y SSH.
+4. Verificar comandos y fundamentos de Linux.
+5. Instalar el entorno del lenguaje de alto nivel seleccionado; se utilizará Python.
+6. Instalar bibliotecas de GPIO, comunicación serial o de red, base de datos y dashboard.
+7. Configurar la ejecución automática y el registro de eventos.
 
 ## Verificación mínima
 
-- ESP32 detectado por el computador.
-- Monitor serial operativo.
-- Proyecto EDA creado.
-- Raspberry Pi accesible por SSH.
-- Python ejecuta un programa dentro del entorno virtual.
-- La Raspberry Pi puede crear y consultar una base SQLite.
-
-## Nota
-
-Las contraseñas, credenciales Wi-Fi, tokens y claves no deben publicarse en el repositorio.
+- El microcontrolador es detectado y puede ejecutar un programa de prueba.
+- El proyecto EDA ejecuta ERC o DRC.
+- La comunicación SPI puede observarse o registrarse.
+- Wi-Fi y Bluetooth/BLE pueden demostrarse.
+- HTTP o MQTT intercambia datos.
+- La Raspberry Pi es accesible por SSH.
+- El programa de alto nivel puede leer GPIO o recibir datos.
+- La base local puede crear, insertar y consultar registros.

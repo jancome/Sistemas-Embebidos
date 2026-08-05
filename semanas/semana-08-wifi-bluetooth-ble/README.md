@@ -1,33 +1,33 @@
-# Semana 08 – Wi-Fi, Bluetooth y BLE
+# Semana 08 – Comunicación inalámbrica: Wi-Fi y Bluetooth/BLE
 
-**Fecha:** 23 de septiembre de 2026 · **Fase 2**
+**Fecha:** 23 de septiembre de 2026 · **Contenido 2.4 del syllabus**
 
 ## Pregunta guía
 
-¿Qué tecnología inalámbrica satisface mejor el alcance, consumo, latencia y tipo de intercambio del proyecto?
+¿Qué diferencias eléctricas, de alcance, consumo, topología y operación existen entre Wi-Fi y Bluetooth/BLE?
 
 ## Resultados
 
-- Comparar Wi-Fi, Bluetooth Clásico y BLE.
-- Configurar conexión y estados.
-- Gestionar desconexión y reconexión.
-- Evitar bloquear la adquisición local.
+- Configurar una experiencia básica con Wi-Fi.
+- Configurar una experiencia básica con Bluetooth Clásico o BLE.
+- Comparar alcance, consumo, latencia, topología y formato de intercambio.
+- Seleccionar la tecnología más apropiada para el proyecto.
 
 ## Contenidos
 
-- Modo estación y punto de acceso.
-- Dirección IP y eventos de red.
-- Bluetooth serial y BLE GATT.
-- Servicio, característica y notificación.
-- Consumo, alcance y seguridad básica.
+- Wi-Fi en modo estación o punto de acceso.
+- Dirección IP y eventos de conexión.
+- Bluetooth Clásico y comunicación serial.
+- BLE: servicios, características y notificaciones.
+- Estados de conexión y reconexión.
 
-## Laboratorio
+## Actividad práctica
 
-Enviar un dato medido por una tecnología inalámbrica y demostrar que el sistema local continúa operando durante una pérdida temporal de conexión.
+La clase incluye una demostración o práctica de ambas familias tecnológicas. El proyecto puede seleccionar una de ellas, pero la decisión debe sustentarse mediante la comparación realizada.
 
-## Evidencia ABP
+## Evidencia
 
-- Tecnología seleccionada y justificación.
-- Máquina de estados de conexión.
-- Captura de datos transmitidos.
-- Estrategia de reconexión.
+- Captura de funcionamiento Wi-Fi.
+- Captura de funcionamiento Bluetooth/BLE.
+- Tabla comparativa.
+- Selección justificada para el proyecto.

@@ -1,34 +1,29 @@
-# Semana 13 – Red, SSH, Python y GPIO
+# Semana 13 – Configuración de red, SSH y lenguaje de alto nivel
 
-**Fecha:** 28 de octubre de 2026 · **Fase 3**
+**Fecha:** 28 de octubre de 2026 · **Contenidos 3.3 y 3.4 del syllabus**
 
 ## Pregunta guía
 
-¿Cómo administrar y programar una Raspberry Pi de forma remota sin comprometer la seguridad de sus GPIO?
+¿Cómo administrar remotamente el SBC y organizar una aplicación de alto nivel?
 
 ## Resultados
 
 - Configurar red y acceso SSH.
-- Crear un entorno virtual de Python.
-- Organizar una aplicación por módulos.
-- Controlar un LED y leer una entrada mediante GPIO Zero.
+- Administrar la Raspberry Pi de forma remota.
+- Crear y ejecutar una aplicación en un lenguaje de alto nivel.
+- Organizar archivos, módulos y dependencias.
 
 ## Contenidos
 
-- Hostname, IP y SSH.
-- Autenticación y administración remota.
-- Python, `venv` y dependencias.
-- Numeración BCM y pinout.
-- Entradas, salidas, resistencias y límites de 3,3 V.
+- Dirección IP, hostname y conectividad.
+- SSH y acceso remoto.
+- Python como lenguaje de alto nivel seleccionado.
+- Entornos y dependencias.
+- Organización modular de la aplicación.
 
-## Laboratorio
+## Evidencia
 
-Acceder por SSH, crear el entorno del proyecto y realizar una práctica GPIO con LED y pulsador o sensor digital.
-
-## Evidencia ABP
-
-- Captura SSH.
-- Estructura Python.
-- Archivo de dependencias.
-- Diagrama GPIO.
-- Video o medición de la prueba.
+- Acceso SSH documentado.
+- Aplicación Python inicial.
+- Estructura del proyecto.
+- Registro de configuración de red.

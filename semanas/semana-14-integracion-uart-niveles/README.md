@@ -1,35 +1,37 @@
-# Semana 14 – Integración ESP32–Raspberry Pi por UART
+# Semana 14 – GPIO del SBC y comunicación microcontrolador–Raspberry Pi
 
-**Fecha:** 4 de noviembre de 2026 · **Fase 3**
+**Fecha:** 4 de noviembre de 2026 · **Contenidos 3.5 y 3.6 del syllabus**
 
 ## Pregunta guía
 
-¿Cómo transportar datos entre dos plataformas sin perder integridad ni dañar sus entradas?
+¿Cómo interactúa la Raspberry Pi con señales físicas y cómo se comunica con el nodo basado en microcontrolador?
 
 ## Resultados
 
-- Verificar niveles lógicos y tierra común.
-- Configurar velocidad, bits y puerto serial.
-- Diseñar una trama con delimitación y validación.
-- Detectar desconexión o datos inválidos.
+- Configurar entradas y salidas GPIO de forma segura.
+- Verificar niveles lógicos y referencias eléctricas.
+- Comparar UART, Wi-Fi, HTTP y MQTT como alternativas de integración.
+- Implementar el enlace seleccionado por el proyecto.
 
 ## Contenidos
 
-- UART TX/RX.
-- Lógica de 3,3 V.
-- Tierra común y conversores de nivel.
-- Baud rate y formato.
-- Tramas de texto o binarias.
-- Checksum, CRC o validación de campos.
-- Lectura no bloqueante.
+- GPIO del SBC.
+- Numeración de pines y límites eléctricos.
+- Entradas, salidas y resistencias.
+- Comunicación UART.
+- Integración por Wi-Fi.
+- Intercambio mediante HTTP o MQTT.
+- Formato, validación y timeout de datos.
 
 ## Laboratorio
 
-Transmitir desde ESP32 una trama con identificación, secuencia, variable y estado. La Raspberry Pi debe validar, mostrar y rechazar una trama incorrecta.
+1. Realizar una práctica GPIO segura.
+2. Implementar o verificar la comunicación seleccionada entre el microcontrolador y la Raspberry Pi.
+3. Documentar por qué se eligió UART, Wi-Fi, HTTP o MQTT.
 
-## Evidencia ABP
+## Evidencia
 
-- Diagrama de conexión.
-- Especificación de trama.
-- Captura de datos válidos e inválidos.
-- Estrategia de timeout.
+- Diagrama GPIO.
+- Diagrama de comunicación.
+- Datos recibidos correctamente.
+- Prueba de dato inválido o pérdida de enlace.

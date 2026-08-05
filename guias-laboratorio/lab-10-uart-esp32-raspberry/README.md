@@ -1,19 +1,31 @@
-# Lab 10 – UART ESP32–Raspberry Pi
+# Lab 10 – Comunicación entre microcontrolador y Raspberry Pi 4
 
 ## Propósito
 
-Transmitir tramas válidas desde ESP32 y procesarlas en Raspberry Pi.
+Implementar y verificar una alternativa de comunicación entre el nodo basado en microcontrolador y el SBC.
 
-## Procedimiento
+## Alternativas del syllabus
 
-1. Verificar niveles de 3,3 V.
-2. Conectar TX–RX, RX–TX y GND cuando corresponda.
-3. Definir baud rate y formato.
-4. Diseñar trama con secuencia y delimitador.
-5. Enviar datos periódicos.
-6. Validar campos en Python.
-7. Probar trama incompleta y timeout.
+- UART.
+- Wi-Fi.
+- HTTP.
+- MQTT.
+
+## Procedimiento general
+
+1. Seleccionar la alternativa según los requerimientos.
+2. Verificar niveles eléctricos cuando exista conexión física.
+3. Definir formato y campos de datos.
+4. Establecer timeout y validación.
+5. Enviar datos desde el microcontrolador.
+6. Recibir y procesar en la Raspberry Pi.
+7. Probar un dato inválido o una interrupción.
+8. Documentar la recuperación.
+
+## Requisito adicional para UART
+
+Cuando se utilice UART se deben verificar TX, RX, GND, tensión lógica, baud rate y formato de trama.
 
 ## Evidencia
 
-Diagrama, especificación de trama, código ESP32, código Python, tramas válidas e inválidas y prueba de recuperación.
+Diagrama, selección justificada, especificación del mensaje, código o configuración, datos válidos e inválidos y prueba de recuperación.
