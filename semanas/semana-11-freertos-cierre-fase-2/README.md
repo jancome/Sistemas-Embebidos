@@ -2,6 +2,8 @@
 
 **Fecha:** 14 de octubre de 2026 · **Fase 2**
 
+**Material de estudio:** [Marco teórico ampliado](marco-teorico.md)
+
 ## Pregunta guía
 
 ¿Cómo organizar adquisición, control y comunicaciones con diferentes periodos sin crear bloqueos ni datos inconsistentes?

@@ -2,6 +2,8 @@
 
 **Fecha:** 5 de agosto de 2026 · **Fase 1**
 
+**Material de estudio:** [Marco teórico ampliado](marco-teorico.md)
+
 ## Pregunta guía
 
 ¿En qué se diferencia un sistema embebido de un computador general y qué problema real puede resolver un nodo ESP32 integrado con una Raspberry Pi 4?

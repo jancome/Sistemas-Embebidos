@@ -2,6 +2,8 @@
 
 **Fecha:** 4 de noviembre de 2026 · **Contenidos 3.5 y 3.6 del syllabus**
 
+**Material de estudio:** [Marco teórico ampliado](marco-teorico.md)
+
 ## Pregunta guía
 
 ¿Cómo interactúa la Raspberry Pi con señales físicas y cómo se comunica con el nodo basado en microcontrolador?

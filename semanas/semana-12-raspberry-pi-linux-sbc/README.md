@@ -2,6 +2,8 @@
 
 **Fecha:** 21 de octubre de 2026 · **Contenidos 3.1 y 3.2 del syllabus**
 
+**Material de estudio:** [Marco teórico ampliado](marco-teorico.md)
+
 ## Pregunta guía
 
 ¿Qué tareas corresponden al microcontrolador y cuáles al computador de placa única?

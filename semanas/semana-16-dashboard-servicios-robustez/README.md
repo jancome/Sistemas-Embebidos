@@ -2,6 +2,8 @@
 
 **Fecha:** 18 de noviembre de 2026 · **Fase 3**
 
+**Material de estudio:** [Marco teórico ampliado](marco-teorico.md)
+
 ## Pregunta guía
 
 ¿Cómo lograr que el sistema opere después de reinicios y permita diagnosticar una falla sin ejecutar manualmente cada programa?

@@ -2,6 +2,8 @@
 
 **Fecha:** 25 de noviembre de 2026 · **Fase 3**
 
+**Material de estudio:** [Marco teórico ampliado](marco-teorico.md)
+
 ## Propósito
 
 Demostrar el sistema embebido distribuido completo y justificar sus decisiones electrónicas, de firmware, comunicación y software.

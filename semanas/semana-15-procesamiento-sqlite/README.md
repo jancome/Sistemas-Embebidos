@@ -2,6 +2,8 @@
 
 **Fecha:** 11 de noviembre de 2026 · **Fase 3**
 
+**Material de estudio:** [Marco teórico ampliado](marco-teorico.md)
+
 ## Pregunta guía
 
 ¿Cómo convertir una secuencia de mediciones en información histórica confiable y consultable?
