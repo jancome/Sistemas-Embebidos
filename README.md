@@ -8,15 +8,21 @@ El curso se desarrolla mediante **ABP – Aprendizaje Basado en Proyectos** y si
 2. Firmware, drivers y comunicaciones.
 3. Integración de microcontrolador y computador de placa única — SBC.
 
-## Plataformas utilizadas
+## Plataformas oficiales por corte
 
-El syllabus no obliga a utilizar una referencia específica de microcontrolador. Para el desarrollo práctico del curso se utilizará un **kit basado en microcontrolador**, con **ESP32 como plataforma de referencia** por los materiales disponibles. También pueden estudiarse STM32 o RP2040 cuando la actividad lo requiera.
+La progresión práctica del curso será:
 
-Para la Unidad 3 se utilizará **Raspberry Pi 4** como implementación concreta del computador de placa única — SBC solicitado en el syllabus.
+| Corte | Plataforma principal | Aplicación durante el curso |
+|---|---|---|
+| Corte 1 | **EasyEDA** | Arquitectura electrónica, esquemático, selección de componentes, footprints, PCB, DRC, Gerber, BOM y cotización de una placa base para ESP32. |
+| Corte 2 | **ESP32** | Programación modular en C/C++, drivers propios, SPI, Wi-Fi, Bluetooth/BLE, HTTP o MQTT y FreeRTOS. |
+| Corte 3 | **Raspberry Pi 4** | Raspberry Pi OS/Linux, red, SSH, Python, GPIO, integración con ESP32, procesamiento, base de datos local, dashboard, servicio y recuperación ante fallas. |
+
+Aunque el ESP32 aparece en el diseño electrónico desde el primer corte, la plataforma central de trabajo de ese corte será **EasyEDA**. La programación y explotación completa del ESP32 se desarrollará principalmente en el segundo corte. La Raspberry Pi 4 será la plataforma central del tercer corte.
 
 ## Situación problema del curso
 
-> **¿Cómo desarrollar una aplicación basada en sistemas embebidos que integre un nodo con microcontrolador y una Raspberry Pi 4 como computador de borde para adquirir, controlar, procesar, almacenar y visualizar información de una situación real de ingeniería electrónica?**
+> **¿Cómo desarrollar una aplicación basada en sistemas embebidos que integre una placa base diseñada en EasyEDA, un nodo ESP32 y una Raspberry Pi 4 como computador de borde para adquirir, controlar, procesar, almacenar y visualizar información de una situación real de ingeniería electrónica?**
 
 Esta situación contextualiza la gran pregunta institucional: **¿Cómo desarrollar aplicaciones basadas en sistemas embebidos?**
 
@@ -24,23 +30,23 @@ Esta situación contextualiza la gran pregunta institucional: **¿Cómo desarrol
 
 | Fase | Corte | Producto principal |
 |---|---|---|
-| Fase 1 | Corte 1 | Problemática, requerimientos, arquitectura, sensores, actuadores, alimentación, protecciones, esquemático, PCB, Gerber, BOM y cotización. |
-| Fase 2 | Corte 2 | Firmware modular, drivers propios, SPI, Wi-Fi, Bluetooth/BLE, HTTP o MQTT y RTOS. |
-| Fase 3 | Corte 3 | Raspberry Pi 4, Linux, red, SSH, lenguaje de alto nivel, GPIO, integración con el microcontrolador, procesamiento, base de datos, dashboard, servicio y recuperación ante fallas. |
+| Fase 1 | Corte 1 – EasyEDA | Problemática, requerimientos, arquitectura, sensores, actuadores, alimentación, protecciones, esquemático, PCB, Gerber, BOM y cotización. |
+| Fase 2 | Corte 2 – ESP32 | Firmware modular, drivers propios, SPI, Wi-Fi, Bluetooth/BLE, HTTP o MQTT y RTOS. |
+| Fase 3 | Corte 3 – Raspberry Pi 4 | Linux, red, SSH, Python, GPIO, integración con ESP32, procesamiento, base de datos, dashboard, servicio y recuperación ante fallas. |
 
 ## Implementaciones seleccionadas
 
-Las siguientes herramientas permiten materializar los resultados del syllabus, pero no sustituyen sus conceptos generales:
-
-| Resultado del syllabus | Implementación propuesta |
+| Resultado del syllabus | Implementación del curso |
 |---|---|
-| Kit basado en microcontrolador | ESP32 como referencia principal |
-| Software EDA | EasyEDA o KiCad; Proteus o Altium cuando estén disponibles |
-| Lenguaje de alto nivel en el SBC | Python |
+| Software EDA | EasyEDA |
+| Nodo basado en microcontrolador | ESP32 |
+| Computador de placa única — SBC | Raspberry Pi 4 |
+| Sistema operativo del SBC | Raspberry Pi OS basado en Linux |
+| Lenguaje de alto nivel | Python |
 | Base de datos local | SQLite |
 | Dashboard o interfaz web | Solución local basada en Python |
-| Ejecución automática como servicio | `systemd` en Raspberry Pi OS |
-| Registro de eventos | Sistema de logs de la aplicación y del servicio |
+| Ejecución automática como servicio | `systemd` |
+| Registro de eventos | Logs de la aplicación y del servicio |
 
 ## GitHub y Microsoft Teams
 
@@ -68,7 +74,7 @@ Cada equipo debe justificar requerimientos eléctricos y funcionales, selección
 ## Seguridad
 
 - Los prototipos académicos deben operar en baja tensión.
-- Deben verificarse los niveles lógicos de cada plataforma.
+- El ESP32 y los GPIO de la Raspberry Pi trabajan con lógica de 3,3 V.
 - No se conectan cargas de potencia directamente a un GPIO.
 - Se deben emplear etapas de potencia, protección y fuentes apropiadas.
 - No se permite conectar montajes estudiantiles directamente a la red eléctrica de 120 V.
