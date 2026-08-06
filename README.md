@@ -52,20 +52,35 @@ Esta situación contextualiza la gran pregunta institucional: **¿Cómo desarrol
 
 | GitHub | Microsoft Teams |
 |---|---|
-| Rutas semanales, guías, cronograma, ejemplos, documentación y plantillas. | Avisos, tareas, entregas, rúbricas, quizzes, parciales, retroalimentación y calificaciones. |
+| Marcos teóricos, rutas semanales, guías, cronograma, ejemplos, documentación y plantillas. | Avisos, tareas, entregas, rúbricas, quizzes, parciales, retroalimentación y calificaciones. |
 
 ## Para comenzar
 
+- [Marcos teóricos y rutas de las 17 semanas](semanas/README.md)
 - [Matriz de alineación con el syllabus](MATRIZ_ALINEACION_SYLLABUS.md)
 - [Syllabus resumido](SYLLABUS.md)
 - [Mapa del curso](MAPA_DEL_CURSO.md)
 - [Cronograma 2026-2](CRONOGRAMA_2026_2.md)
-- [Semanas de clase](semanas/README.md)
 - [Estrategia ABP](ABP_PROYECTO_DE_CURSO.md)
 - [Evaluación](EVALUACION.md)
 - [Proyecto final](PROYECTO_FINAL.md)
 - [Materiales](MATERIALES.md)
 - [Instalación de software](INSTALACION_SOFTWARE.md)
+
+## Marcos teóricos semanales
+
+Cada carpeta semanal contiene un archivo `marco-teorico.md` y su respectivo enlace desde el `README.md` de la semana. El índice de semanas ofrece además acceso directo a los 17 marcos, sin necesidad de navegar manualmente por las carpetas.
+
+Los marcos incluyen:
+
+- propósito y resultados de aprendizaje;
+- fundamentos técnicos y criterios eléctricos;
+- ejemplos guiados;
+- actividad práctica o laboratorio;
+- relación con el proyecto ABP;
+- diagnóstico de fallas y errores comunes;
+- trabajo independiente;
+- referencias de apoyo.
 
 ## Enfoque de Ingeniería Electrónica
 
