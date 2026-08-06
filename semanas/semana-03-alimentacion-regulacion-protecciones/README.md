@@ -2,6 +2,10 @@
 
 **Fecha:** 19 de agosto de 2026 · **Fase 1**
 
+## Recurso principal
+
+- [Marco teórico: alimentación, regulación, desacoplamiento y protecciones](marco-teorico.md)
+
 ## Pregunta guía
 
 ¿Cómo alimentar y proteger el nodo para que las mediciones y comunicaciones sean confiables?
