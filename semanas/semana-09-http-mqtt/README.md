@@ -2,6 +2,10 @@
 
 **Fecha:** 30 de septiembre de 2026 · **Fase 2**
 
+## Recurso principal
+
+- [Marco teórico: protocolos HTTP y MQTT](marco-teorico.md)
+
 ## Pregunta guía
 
 ¿Cómo intercambiar datos sin confundir el protocolo, el formato del mensaje y la lógica de aplicación?
