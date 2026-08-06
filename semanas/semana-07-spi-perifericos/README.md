@@ -2,6 +2,10 @@
 
 **Fecha:** 16 de septiembre de 2026 · **Fase 2**
 
+## Recurso principal
+
+- [Marco teórico: bus SPI e integración de periféricos](marco-teorico.md)
+
 ## Pregunta guía
 
 ¿Cómo verificar que una comunicación SPI cumple niveles, temporización y formato de datos?
