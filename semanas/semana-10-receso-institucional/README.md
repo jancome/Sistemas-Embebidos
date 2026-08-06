@@ -2,6 +2,10 @@
 
 **Fecha:** 7 de octubre de 2026
 
+## Recurso de consolidación
+
+- [Marco teórico de repaso y consolidación de la Fase 2](marco-teorico.md)
+
 Durante la semana del 5 al 11 de octubre no se programará contenido nuevo.
 
 ## Trabajo autónomo permitido
