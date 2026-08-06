@@ -2,6 +2,10 @@
 
 **Fecha:** 28 de octubre de 2026 · **Contenidos 3.3 y 3.4 del syllabus**
 
+## Recurso principal
+
+- [Marco teórico: red, SSH, Python y organización de aplicaciones](marco-teorico.md)
+
 ## Pregunta guía
 
 ¿Cómo administrar remotamente el SBC y organizar una aplicación de alto nivel?
