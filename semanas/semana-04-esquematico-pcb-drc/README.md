@@ -2,6 +2,10 @@
 
 **Fecha:** 26 de agosto de 2026 · **Fase 1**
 
+## Recurso principal
+
+- [Marco teórico: diseño esquemático, PCB y verificación DRC](marco-teorico.md)
+
 ## Pregunta guía
 
 ¿Cómo convertir la arquitectura en una placa fabricable, verificable y mantenible?
