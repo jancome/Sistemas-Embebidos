@@ -2,6 +2,10 @@
 
 **Fecha:** 9 de septiembre de 2026 · **Fase 2**
 
+## Recurso principal
+
+- [Marco teórico: firmware modular, arquitectura por capas y drivers](marco-teorico.md)
+
 ## Pregunta guía
 
 ¿Cómo separar el firmware para que sensores, comunicación y lógica de aplicación puedan probarse y mantenerse de forma independiente?
