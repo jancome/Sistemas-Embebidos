@@ -2,6 +2,10 @@
 
 **Fecha:** 23 de septiembre de 2026 · **Contenido 2.4 del syllabus**
 
+## Recurso principal
+
+- [Marco teórico: Wi-Fi, Bluetooth Clásico y BLE en ESP32](marco-teorico.md)
+
 ## Pregunta guía
 
 ¿Qué diferencias eléctricas, de alcance, consumo, topología y operación existen entre Wi-Fi y Bluetooth/BLE?
