@@ -2,6 +2,10 @@
 
 **Fecha:** 21 de octubre de 2026 · **Contenidos 3.1 y 3.2 del syllabus**
 
+## Recurso principal
+
+- [Marco teórico: microcontroladores, SBC, Raspberry Pi OS y Linux](marco-teorico.md)
+
 ## Pregunta guía
 
 ¿Qué tareas corresponden al microcontrolador y cuáles al computador de placa única?
