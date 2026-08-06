@@ -2,6 +2,10 @@
 
 **Fecha:** 12 de agosto de 2026 · **Fase 1**
 
+## Recurso principal
+
+- [Marco teórico: requerimientos, sensores, actuadores e interfaces](marco-teorico.md)
+
 ## Pregunta guía
 
 ¿Cómo seleccionar sensores y actuadores a partir de requisitos medibles y no por disponibilidad o preferencia?
