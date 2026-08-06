@@ -2,6 +2,10 @@
 
 **Fecha:** 14 de octubre de 2026 · **Fase 2**
 
+## Recurso principal
+
+- [Marco teórico: FreeRTOS, concurrencia y cierre de la Fase 2](marco-teorico.md)
+
 ## Pregunta guía
 
 ¿Cómo organizar adquisición, control y comunicaciones con diferentes periodos sin crear bloqueos ni datos inconsistentes?
