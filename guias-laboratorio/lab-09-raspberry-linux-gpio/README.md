@@ -21,3 +21,7 @@ No aplicar 5 V a un GPIO. No conectar motores o relés directamente.
 ## Evidencia
 
 Captura SSH, comandos, entorno virtual, diagrama de conexión, código y resultado.
+
+## Actividad de monitoreo Linux — 4 de noviembre de 2026
+
+[Guía práctica: demostración de temperatura y reto de RAM con CSV](actividad-monitoreo-linux/README.md). Incluye código docente, pruebas, entrega de hoy en Teams y plantilla de informe. Acceso por Connect o escritorio local; no requiere GPIO. Aplicable a Pi 4/5.
