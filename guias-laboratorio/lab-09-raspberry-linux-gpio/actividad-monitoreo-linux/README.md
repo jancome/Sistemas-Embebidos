@@ -2,6 +2,10 @@
 **Sesión y entrega de clase: 4 de noviembre de 2026 (Colombia).**  
 Complemento práctico del Lab 09, con adelanto de procesamiento y persistencia. Compatible con Raspberry Pi 4/5 y Raspberry Pi OS. No sustituye el enlace ESP32–Raspberry, SQLite ni el dashboard de los laboratorios siguientes.
 
+## Lectura de apoyo
+
+[Marco teórico ampliado: características, ventajas, limitaciones y Raspberry frente a PC](marco-teorico.md). Explica arquitectura ESP32–Raspberry, Linux, adquisición, validación y CSV, con preguntas para sustentar el informe.
+
 ## Objetivo
 Construir y comprobar el flujo **fuente Linux → adquisición Python → validación → clasificación → CSV**; distinguir almacenamiento, memoria y sensor interno. Acceso mediante Raspberry Pi Connect (escritorio) o local. SSH es opcional.
 
