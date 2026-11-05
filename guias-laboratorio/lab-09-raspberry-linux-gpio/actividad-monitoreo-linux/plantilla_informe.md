@@ -40,7 +40,7 @@ Capturas seleccionadas, legibles y sin contraseñas: ___.
 ¿Qué control/protecciones deben continuar si la Raspberry se reinicia?
 
 ## 6. Conclusiones y fuentes
-Tres conclusiones sustentadas en resultados, no solo descripción del código. Para cada una completar: **observación (archivo/fila/hora) → cálculo o comparación → interpretación → límite**. Usar la [guía de razonamiento](guia_razonamiento_ram.md).
+Tres conclusiones sustentadas en resultados, no solo descripción del código. Para cada una completar: **observación (archivo/fila/hora) → cálculo o comparación → interpretación → límite**. Consultar [Cómo construir conclusiones con evidencia en la guía del laboratorio](README.md#conclusiones-con-evidencia).
 
 | Observación verificable | Cálculo/comparación | Qué permite concluir | Qué no se probó |
 |---|---|---|---|
