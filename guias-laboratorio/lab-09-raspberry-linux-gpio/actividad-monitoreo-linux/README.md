@@ -42,6 +42,10 @@ Guía detallada y programa: [monitor_temperatura.py](monitor_temperatura.py).
 ## Parte B — reto estudiantil: monitor de memoria RAM
 **No repetir la temperatura:** implementar `monitor_ram.py`, usando como referencia la arquitectura anterior, no sustituyendo nombres de variables sin comprenderlos.
 
+### Antes de programar: entender qué vamos a demostrar
+
+Seguir la [guía de razonamiento paso a paso](guia_razonamiento_ram.md): origen de los datos, significado de MemAvailable, derivación de la fórmula, elección del umbral y alcance de cada prueba. Las conclusiones deben seguir **observación → cálculo/comparación → interpretación → límite**. No basta ejecutar el código.
+
 ### Fuente y cálculo
 Consultar `/proc/meminfo`:
 ```python
@@ -59,7 +63,7 @@ porcentaje_usado = (MemTotal - MemAvailable) / MemTotal * 100
 - Intervalo inicial **5 segundos**, configurable, finito y mayor que cero.
 - Umbral porcentual configurable entre 0 y 100; condición de ALERTA: porcentaje >= umbral.
 - Validar presencia de ambas claves, números válidos, total > 0 y 0 <= disponible <= total; porcentaje finito entre 0 y 100.
-- Si lectura/conversión/validación falla, registrar ERROR y detalle, dejando las columnas numéricas vacías; no usar ceros inventados ni conservar la lectura anterior como nueva.
+- Si lectura/conversión/validación falla, registrar ERROR y detalle, dejando vacíos los campos de medición (total, disponible y porcentaje); conservar el umbral configurado; no usar ceros inventados ni conservar la lectura anterior como nueva.
 - Mostrar cada resultado y guardar `memoria.csv` junto al script; agregar sin borrar, encabezado solo nuevo/vacío.
 - Columnas: `fecha_hora,mem_total_kib,mem_disponible_kib,porcentaje_usado,umbral_pct,estado,detalle`.
 - Fecha con zona horaria, Ctrl+C para finalizar; no ejecutar como root.
@@ -73,7 +77,9 @@ Detener antes de editar, guardar y ejecutar. Guardar CSV separado por prueba o i
 | P2 | Intervalo 2 s, ejecutar al menos 30 s | Al menos 12 registros; menor separación temporal |
 | P3 | Umbral mayor que uso observado | NORMAL si uso permanece inferior |
 | P4 | Umbral menor o igual al uso observado | ALERTA cuando se cumple la condición |
-| P5 | Ruta de lectura temporal inexistente; luego restaurar | ERROR con numéricos vacíos y detalle; posteriormente lectura válida |
+| P5 | Ruta de lectura temporal inexistente; luego restaurar | ERROR con mediciones vacías y detalle; posteriormente lectura válida |
+
+Los umbrales son decisiones didácticas, no límites universales de fallo de la RAM. Cambiarlos demuestra la regla de clasificación, no saturación real. Una ruta inexistente demuestra manejo de error de adquisición, no daño físico ni recuperación automática. Para cada resultado identificar el archivo y la fila/hora, calcular o comparar y declarar qué se pudo demostrar.
 
 No saturar RAM ni abrir procesos en masa para generar ALERTA. Revisar condición por fila porque el uso fluctúa. Un ejemplo numérico calculado a mano puede ayudar, pero se etiqueta como ejemplo y no sustituye mediciones reales.
 
@@ -95,7 +101,7 @@ El informe es **breve, de 2–4 páginas** y se elabora con los resultados de ho
 4. Tabla P1–P5 con parámetros, esperado, observado y evidencia (archivo y fila/hora).
 5. Un cálculo manual usando una fila real; comparación NORMAL/ALERTA/ERROR; fallas y limitaciones.
 6. Qué cambiaría si los datos vinieran del ESP32 por USB serial (adquisición, mensaje, timeout, validación y recuperación), conservando procesamiento/registro.
-7. Conclusiones y fuentes; explicar ayuda externa recibida y comprensión propia.
+7. Conclusiones y fuentes: respaldar cada conclusión con datos, cálculo o comparación, interpretación y límite de la prueba; explicar ayuda externa recibida y comprensión propia.
 
 ## Criterios de revisión
 Lista de comprobación del laboratorio, **sin modificar pesos de EVALUACION.md**:
