@@ -11,7 +11,8 @@ Modelo de Raspberry / Raspberry Pi OS / Python:
 Acceso utilizado (Connect o local):  
 Diagrama de adquisición → cálculo → validación → clasificación → CSV:  
 Fuente consultada y significado de MemTotal/MemAvailable:  
-Fórmula y criterio NORMAL/ALERTA/ERROR:
+Fórmula, derivación en palabras propias y criterio NORMAL/ALERTA/ERROR:  
+Umbral elegido y por qué sirve para la prueba (no presentarlo como límite universal de fallo):
 
 ## 3. Resultados verificables
 | ID | Parámetros y duración | Resultado esperado | Resultado observado | Archivo y fila/hora |
@@ -39,7 +40,15 @@ Capturas seleccionadas, legibles y sin contraseñas: ___.
 ¿Qué control/protecciones deben continuar si la Raspberry se reinicia?
 
 ## 6. Conclusiones y fuentes
-Tres conclusiones sustentadas en resultados, no solo descripción del código. Citar documentación y ayuda externa utilizada. Todos deben poder defender la implementación.
+Tres conclusiones sustentadas en resultados, no solo descripción del código. Para cada una completar: **observación (archivo/fila/hora) → cálculo o comparación → interpretación → límite**. Usar la [guía de razonamiento](guia_razonamiento_ram.md).
+
+| Observación verificable | Cálculo/comparación | Qué permite concluir | Qué no se probó |
+|---|---|---|---|
+| | | | |
+| | | | |
+| | | | |
+
+Cambiar un umbral no demuestra saturación; una ruta inexistente no demuestra daño físico de RAM; restaurar manualmente la ruta no equivale a recuperación automática. Citar documentación y ayuda externa utilizada. Todos deben poder defender la implementación.
 
 ## Archivos adjuntos
 - monitor_ram.py comentado.
