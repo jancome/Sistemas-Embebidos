@@ -39,11 +39,77 @@ Guía detallada y programa: [monitor_temperatura.py](monitor_temperatura.py).
 10. Detener, cambiar SOLO `RUTA_SENSOR` a `Path("/ruta_inexistente/temp")`, ejecutar y observar ERROR con temperatura vacía; detener y restaurar ruta correcta. No modificar archivos de /sys.
 11. Mostrar recuperación manual al restaurar la configuración. El intervalo es aproximado: el procesamiento añade tiempo. El CSV usa append; conserva las filas anteriores. No cambiar encabezados entre ejecuciones en el mismo archivo.
 
+### Ejemplos para construir la demostración de temperatura
+
+**A1. Leer y convertir una sola vez — ejemplo independiente:**
+```python
+from pathlib import Path
+
+texto = Path("/sys/class/thermal/thermal_zone0/temp").read_text()
+valor = float(texto.strip())
+temperatura = valor / 1000  # Milésimas de grado a °C
+
+print(f"Temperatura del procesador: {temperatura:.1f} °C")
+```
+
+**Qué comprobar:** una lectura real de CPU, que puede cambiar entre consultas.
+
+**A2. Repetir tres lecturas — reemplazar el ejemplo anterior por este:**
+```python
+from pathlib import Path
+import time
+
+ruta = Path("/sys/class/thermal/thermal_zone0/temp")
+
+for numero in range(3):
+    temperatura = float(ruta.read_text().strip()) / 1000
+    print(f"Lectura {numero + 1}: {temperatura:.1f} °C")
+
+    if numero < 2:
+        time.sleep(2)
+```
+
+**Qué comprobar:** tres lecturas y fin automático. La sangría indica qué se repite.
+
+**A3. Aislar la clasificación — ejemplo independiente con dato ilustrativo:**
+```python
+temperatura = 54.0  # Ejemplo, no lectura real
+umbral = 55.0  # Umbral didáctico
+
+if temperatura >= umbral:
+    estado = "ALERTA"
+else:
+    estado = "NORMAL"
+
+print(f"{temperatura:.1f} °C | {estado}")
+```
+
+**Resultado esperado:** NORMAL. Cambiar el umbral a 50 produce ALERTA con la misma temperatura ilustrativa.
+
+**A4. Integrar y revisar el registro:** ejecutar el [programa docente completo](monitor_temperatura.py) para adquirir lecturas reales, validar y guardar CSV. Después de detenerlo, guardar este ejemplo junto a temperatura.csv:
+```python
+from pathlib import Path
+import csv
+
+ruta_csv = Path(__file__).resolve().parent / "temperatura.csv"
+
+if not ruta_csv.exists():
+    raise SystemExit("Primero ejecute monitor_temperatura.py")
+
+with ruta_csv.open(newline="", encoding="utf-8") as archivo:
+    for fila in csv.DictReader(archivo):
+        print(fila["fecha_hora"], fila["temperatura_c"], fila["estado"])
+```
+
+**Qué comprobar:** las filas contienen lecturas y clasificación. Si hay ERROR, consultar también el detalle del CSV. Este ejemplo solo lee el registro.
+
 ## Parte B — reto estudiantil: monitor de memoria RAM
 
 Implementar `monitor_ram.py`, aplicando el patrón de adquisición, validación, clasificación y registro a una fuente diferente de la temperatura. La explicación y el procedimiento están completos en esta misma guía.
 
-**Todos los valores numéricos de ejemplo son ilustrativos.** Cada grupo debe sustituirlos por sus mediciones reales y justificar sus conclusiones con archivos y filas concretos.
+**Los valores fijos de los ejemplos son ilustrativos.** Los fragmentos que consultan /proc/meminfo obtienen datos reales del equipo. Cada grupo debe justificar sus conclusiones con sus propias mediciones.
+
+**Cómo utilizar los ejemplos:** ejecutar cada ejemplo independiente en un archivo nuevo de Thonny, con nombre como paso_01.py. Guardar antes de ejecutar. No es necesario pegar todos los fragmentos uno debajo de otro. La sección **Integrar los pasos** reúne el monitor completo. Los ejemplos de análisis CSV se ejecutan después de generar memoria.csv.
 
 ### Empezar por una pregunta observable
 **Pregunta:** ¿qué proporción de la RAM utilizable no está disponible para nuevas aplicaciones en este momento?
@@ -52,7 +118,23 @@ No comenzamos con una declaración como “la memoria está mal”. Necesitamos 
 
 **Para decir en clase:** “Antes de programar debemos saber qué queremos conocer y con qué dato podemos responder”.
 
+#### Ejemplo 1 — definir qué configuramos
+**Archivo sugerido: paso_01.py.** Ejecutar en Thonny.
+```python
+intervalo_s = 5  # Decisión: cada cuánto consultar
+umbral_pct = 70  # Decisión didáctica: cuándo clasificar como ALERTA
+
+print("Fuente: /proc/meminfo")
+print("Medida: porcentaje estimado de RAM utilizada")
+print(f"Intervalo: {intervalo_s} segundos")
+print(f"Umbral de prueba: {umbral_pct}%")
+```
+
+**Qué comprobar:** se imprimen los parámetros. Todavía no hay una medición: estamos definiendo la pregunta y las reglas.
+
 ### Encontrar la fuente antes de extraer valores
+**Ejemplo 2 — consultar datos reales.** La consulta Python siguiente es independiente y permite observar el archivo antes de interpretarlo.
+
 En la terminal de la Raspberry ejecutar:
 ```bash
 cat /proc/meminfo
@@ -113,6 +195,24 @@ Restamos para obtener el complemento de la disponibilidad; dividimos entre el to
 
 **Verificación del estudiante:** seleccionar total y disponible de **una misma fila** del CSV, hacer el cálculo a mano y contrastar el porcentaje. No mezclar capturas de momentos distintos.
 
+#### Ejemplo 3 — reproducir el cálculo en Python
+**Ejemplo independiente con valores ilustrativos**, no obtenidos de la placa.
+```python
+total = 8_000_000  # KiB de ejemplo; _ facilita leer números grandes
+disponible = 6_000_000  # KiB de ejemplo
+
+no_disponible = total - disponible
+fraccion = no_disponible / total
+porcentaje = fraccion * 100
+
+print("Cantidad no disponible estimada:", no_disponible, "KiB")
+print("Fracción:", fraccion)
+print(f"Uso estimado: {porcentaje:.2f}%")
+```
+
+**Resultado esperado:** 2000000 KiB, 0.25 y 25.00 %. El formato :.2f muestra dos decimales; no cambia el cálculo almacenado.
+**Para explicar:** la resta obtiene una cantidad, la división una proporción y multiplicar por 100 la expresa como porcentaje.
+
 ### Entender qué parte del código obtiene cada dato
 Seguir esta correspondencia, sin memorizar todo el programa:
 | Operación | Papel en el razonamiento |
@@ -127,6 +227,33 @@ Seguir esta correspondencia, sin memorizar todo el programa:
 
 No tomar los valores por “línea 1” o “línea 3”: el contrato relevante es el nombre del campo. El prefijo `def` define una función; llamarla ejecuta ese bloque. Separar adquisición, validación y registro facilita localizar el origen de una falla.
 
+#### Ejemplo 4 — extraer valores reales por nombre
+**Ejemplo independiente:** leer una vez la Raspberry y mostrar el resultado.
+```python
+from pathlib import Path
+
+contenido = Path("/proc/meminfo").read_text()
+datos = {}  # Diccionario: asocia cada nombre con su valor
+
+for linea in contenido.splitlines():
+    partes = linea.split()
+
+    if partes and partes[0] in ("MemTotal:", "MemAvailable:"):
+        nombre = partes[0].rstrip(":")  # "MemTotal:" pasa a "MemTotal"
+        datos[nombre] = int(partes[1])  # El segundo campo es el número
+
+total = datos["MemTotal"]
+disponible = datos["MemAvailable"]
+porcentaje = (total - disponible) / total * 100
+
+print("Total:", total, "KiB")
+print("Disponible:", disponible, "KiB")
+print(f"Uso estimado: {porcentaje:.2f}%")
+```
+
+**Qué comprobar:** los dos números corresponden al contenido leído y el porcentaje coincide con un cálculo manual usando esos mismos números.
+**Alcance:** este ejemplo supone el formato normal de /proc/meminfo; la validación explícita se añade en el siguiente paso. El diccionario busca por nombre, no por posición en el archivo.
+
 ### Validar antes de calcular o clasificar
 Cada comprobación tiene un motivo:
 | Comprobación | Qué evita |
@@ -140,6 +267,37 @@ Cada comprobación tiene un motivo:
 | Intervalo > 0 y umbral entre 0 y 100 | Ejecutar con una configuración incoherente |
 
 Estas condiciones detectan ciertos datos inválidos; no certifican la integridad física de la memoria.
+
+#### Ejemplo 5 — aceptar datos coherentes y rechazar otros
+**Prueba independiente con datos ilustrativos.** No cambia la memoria del equipo.
+```python
+def calcular_porcentaje(total, disponible):
+    if total <= 0:
+        raise ValueError("El total debe ser mayor que cero")
+
+    if not 0 <= disponible <= total:
+        raise ValueError("La memoria disponible no es coherente")
+
+    return (total - disponible) / total * 100
+
+casos = [
+    (8_000_000, 6_000_000),  # Caso válido
+    (0, 0),  # Impedir una división entre cero
+    (8_000_000, 9_000_000),  # Disponible mayor que total
+]
+
+for total, disponible in casos:
+    try:
+        porcentaje = calcular_porcentaje(total, disponible)
+        print(f"Datos aceptados: {porcentaje:.2f}%")
+    except ValueError as error:
+        print("Datos rechazados:", error)
+```
+
+**Resultado esperado:** un cálculo de 25.00 % y dos rechazos con explicación.
+**Para explicar:** raise comunica que un dato no puede utilizarse; except permite atender el fallo. La función es una tarea con nombre, entradas y un resultado.
+
+El programa integrado también valida claves, unidad, conversión numérica y parámetros de configuración.
 
 ### Diferenciar medición y decisión
 La lectura y la fórmula producen el porcentaje. **El umbral lo elegimos nosotros**: no lo proporciona MemAvailable ni hay en esta actividad un valor universal de 70 % que signifique falla.
@@ -163,6 +321,26 @@ Cambiar el umbral puede cambiar el estado sin que haya cambiado el uso de memori
 
 **No demuestra:** que la RAM se haya saturado, que exista una emergencia ni que el umbral sea adecuado para un proceso real. No saturar RAM para producir el estado.
 
+#### Ejemplo 6 — mantener el dato y cambiar la regla
+**Valores ilustrativos:** conservar el mismo 25 % para aislar el efecto del umbral.
+```python
+porcentaje = 25.0
+
+for umbral in (70, 20):
+    if porcentaje >= umbral:
+        estado = "ALERTA"
+    else:
+        estado = "NORMAL"
+
+    print(
+        f"Uso: {porcentaje:.2f}% | "
+        f"Umbral: {umbral}% | Estado: {estado}"
+    )
+```
+
+**Resultado esperado:** NORMAL con 70 y ALERTA con 20.
+**Qué demuestra:** la decisión responde a la regla. El ejemplo no ha aumentado la carga ni saturado la RAM.
+
 ### Distinguir ERROR de ALERTA
 Para probar ERROR se cambia temporalmente **solo la ruta escrita en el código** a `/ruta_inexistente/meminfo`. No borrar ni modificar archivos de /proc.
 
@@ -177,6 +355,32 @@ Restaurar la ruta y ejecutar otra vez comprueba que vuelve a adquirir datos. Est
 **Conclusión permitida:** “Ante una ruta inexistente, el programa registró ERROR y volvió a medir después de restaurar la ruta”.
 
 **No permite concluir:** que falló físicamente la RAM, que se probó una desconexión USB o que ya existe recuperación automática ante cualquier falla.
+
+#### Ejemplo 7 — tratar un fallo de lectura
+**Ejemplo independiente:** una ruta inexistente genera un error controlado.
+```python
+from pathlib import Path
+
+ruta = Path("/ruta_inexistente/meminfo")
+
+try:
+    contenido = ruta.read_text()
+    print("Lectura realizada; el contenido todavía debe validarse.")
+
+except OSError as error:
+    total = ""
+    disponible = ""
+    porcentaje = ""
+    estado = "ERROR"
+    detalle = str(error)
+
+    print("Estado:", estado)
+    print("Porcentaje:", repr(porcentaje))  # Muestra '' para cadena vacía
+    print("Detalle:", detalle)
+```
+
+**Resultado esperado:** ERROR, porcentaje vacío y detalle de archivo inexistente.
+Para reintentar la lectura real, detener y cambiar la ruta a Path("/proc/meminfo"). En este ejemplo leer el contenido no implica aún que se haya validado.
 
 ### Comprobar muestreo y persistencia con evidencia
 #### Intervalo
@@ -200,6 +404,194 @@ Al cambiar de 5 s a 2 s, la expectativa es menor separación temporal y más reg
 4. Ejecutar de nuevo y verificar nuevas filas sin borrar las anteriores.
 
 Eso demuestra conservación en el archivo entre ejecuciones. No equivale a probar integridad ante cortes eléctricos ni arranque automático. Si una hoja de cálculo muestra una sola columna, importar como CSV con separador coma; alternativamente inspeccionar con editor de texto.
+
+#### Ejemplo 8A — observar una pausa repetida
+**Ejemplo independiente:** tres marcas de tiempo; termina solo.
+```python
+from datetime import datetime
+import time
+
+intervalo_s = 2
+
+for numero in range(3):
+    fecha = datetime.now().astimezone().isoformat(timespec="seconds")
+    print(f"Registro {numero + 1}: {fecha}")
+
+    if numero < 2:
+        time.sleep(intervalo_s)  # Pausa antes de la siguiente marca
+```
+
+**Qué comprobar:** tres marcas con separación cercana a 2 segundos. Cambiar a 5 y comparar. Este ejemplo enseña repetición y tiempo, todavía no adquiere RAM ni guarda CSV.
+
+#### Ejemplo 8B — aprender a guardar una fila
+**Guardar el ejemplo como archivo .py antes de ejecutarlo.** Usa valores ilustrativos y crea **ejemplo_memoria.csv**, separado del registro real.
+```python
+from pathlib import Path
+from datetime import datetime
+import csv
+
+ruta_csv = Path(__file__).resolve().parent / "ejemplo_memoria.csv"
+nuevo = not ruta_csv.exists() or ruta_csv.stat().st_size == 0
+
+with ruta_csv.open("a", newline="", encoding="utf-8") as archivo:
+    escritor = csv.writer(archivo)
+
+    if nuevo:
+        escritor.writerow([
+            "fecha_hora", "mem_total_kib", "mem_disponible_kib",
+            "porcentaje_usado", "umbral_pct", "estado", "detalle"
+        ])
+
+    fecha = datetime.now().astimezone().isoformat(timespec="seconds")
+    escritor.writerow([
+        fecha, 8_000_000, 6_000_000, 25.0, 70, "NORMAL",
+        "Valores ilustrativos"
+    ])
+
+print("Fila de ejemplo guardada en:", ruta_csv)
+```
+
+**Qué comprobar:** ejecutar dos veces, abrir el archivo y encontrar un encabezado y dos filas. El modo "a" añade; with cierra al salir. Estos valores no reemplazan el CSV de mediciones reales.
+
+#### Ejemplo 8C — calcular la separación media
+**Datos de tiempo ilustrativos:** sustituirlos por marcas de un tramo continuo del CSV real, sin mezclar reinicios del programa.
+```python
+from datetime import datetime
+
+# Marcas ilustrativas de un tramo continuo de una misma ejecución
+marcas = [
+    "2026-11-04T18:10:00-05:00",
+    "2026-11-04T18:10:05-05:00",
+    "2026-11-04T18:10:10-05:00",
+]
+fechas = [datetime.fromisoformat(marca) for marca in marcas]
+transcurrido_s = (fechas[-1] - fechas[0]).total_seconds()
+intervalo_medio = transcurrido_s / (len(fechas) - 1)
+
+print("Intervalo medio:", intervalo_medio, "segundos")
+```
+**Resultado esperado del ejemplo:** 5.0 segundos. Hay dos separaciones entre tres marcas; por eso dividimos entre cantidad de lecturas menos uno.
+
+### Integrar los pasos y ejecutar el monitor completo
+
+Después de comprender los ejemplos, guardar el programa integrado como **monitor_ram.py** en una carpeta propia. Este es el que obtiene las mediciones reales de la entrega y genera memoria.csv junto al script. Los fragmentos anteriores son ejercicios independientes de aprendizaje.
+
+<details>
+<summary>Ver programa integrado comentado</summary>
+
+```python
+from pathlib import Path  # Permite acceder a archivos y rutas
+from datetime import datetime  # Permite obtener fecha y hora
+import csv  # Permite guardar las mediciones en CSV
+import math  # Permite comprobar que un número sea finito
+import time  # Permite hacer pausas
+
+RUTA_MEMORIA = Path("/proc/meminfo")  # Información de memoria de Linux
+INTERVALO_S = 5  # Segundos de pausa entre lecturas
+UMBRAL_PCT = 70  # Umbral didáctico de porcentaje utilizado
+ARCHIVO_CSV = Path(__file__).resolve().parent / "memoria.csv"
+
+
+def leer_memoria():
+    contenido = RUTA_MEMORIA.read_text()  # Lee el estado de la RAM
+    datos = {}  # Guardará los valores encontrados
+
+    for linea in contenido.splitlines():  # Revisa una línea a la vez
+        partes = linea.split()  # Separa el nombre, el valor y la unidad
+
+        if partes and partes[0] in ("MemTotal:", "MemAvailable:"):
+            if len(partes) != 3 or partes[2] != "kB":
+                raise ValueError("Formato o unidad de memoria inesperados")
+
+            nombre = partes[0].rstrip(":")  # Quita los dos puntos
+            datos[nombre] = int(partes[1])  # Convierte el valor a entero
+
+    if "MemTotal" not in datos or "MemAvailable" not in datos:
+        raise ValueError("Falta MemTotal o MemAvailable")
+
+    total = datos["MemTotal"]
+    disponible = datos["MemAvailable"]
+
+    if total <= 0 or not 0 <= disponible <= total:
+        raise ValueError("Valores de memoria incoherentes")
+
+    porcentaje = (total - disponible) / total * 100
+
+    if not math.isfinite(porcentaje) or not 0 <= porcentaje <= 100:
+        raise ValueError("Porcentaje de uso inválido")
+
+    return total, disponible, porcentaje  # Devuelve las tres mediciones
+
+
+def main():
+    if not math.isfinite(INTERVALO_S) or INTERVALO_S <= 0:
+        raise ValueError("El intervalo debe ser finito y mayor que cero")
+
+    if not math.isfinite(UMBRAL_PCT) or not 0 <= UMBRAL_PCT <= 100:
+        raise ValueError("El umbral debe estar entre 0 y 100")
+
+    nuevo = not ARCHIVO_CSV.exists() or ARCHIVO_CSV.stat().st_size == 0
+
+    with ARCHIVO_CSV.open("a", newline="", encoding="utf-8") as archivo:
+        escritor = csv.writer(archivo)  # Escribe filas sin borrar las previas
+
+        if nuevo:  # Encabezado solo si el archivo no existe o está vacío
+            escritor.writerow([
+                "fecha_hora", "mem_total_kib", "mem_disponible_kib",
+                "porcentaje_usado", "umbral_pct", "estado", "detalle"
+            ])
+
+        print(f"Archivo de registro: {ARCHIVO_CSV}")
+        print("Pulsa Ctrl+C para detener la medición.")
+
+        while True:
+            fecha = datetime.now().astimezone().isoformat(timespec="seconds")
+
+            try:
+                total, disponible, porcentaje = leer_memoria()
+
+                if porcentaje >= UMBRAL_PCT:
+                    estado = "ALERTA"
+                else:
+                    estado = "NORMAL"
+
+                detalle = ""  # Sin error de lectura
+                resumen = f"RAM utilizada: {porcentaje:.2f}% | {estado}"
+
+            except (OSError, ValueError) as error:
+                total, disponible, porcentaje = "", "", ""  # No inventar datos
+                estado = "ERROR"
+                detalle = str(error)  # Guarda la causa del fallo
+                resumen = f"ERROR | {detalle}"
+
+            escritor.writerow([
+                fecha, total, disponible, porcentaje,
+                UMBRAL_PCT, estado, detalle
+            ])
+            archivo.flush()  # Envía los datos al sistema de archivos
+            print(f"{fecha} | {resumen}")
+            time.sleep(INTERVALO_S)  # La pausa no garantiza un intervalo exacto
+
+
+if __name__ == "__main__":  # Ejecuta al abrir el archivo como programa
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\nMedición detenida.")
+    except OSError as error:
+        raise SystemExit(f"No se pudo abrir o escribir el CSV: {error}")
+    except (ValueError, TypeError) as error:
+        raise SystemExit(f"Configuración inválida: {error}")
+```
+
+</details>
+
+Ejecutar desde Thonny con Run o desde la terminal situada en esa carpeta:
+```bash
+python3 monitor_ram.py
+```
+
+Detener con Ctrl+C en la terminal; en Thonny usar la consola o Stop. Esperar al menos un minuto y comprobar el CSV antes de cambiar parámetros.
 
 ### Requisitos funcionales
 - Intervalo inicial **5 segundos**, configurable, finito y mayor que cero.
@@ -235,6 +627,33 @@ No saturar RAM ni abrir procesos en masa para generar ALERTA. Revisar condición
 
 Distinguir expectativa de observación: si no coincide, informar discrepancia y revisar. No adaptar los datos para que encajen con la expectativa.
 
+#### Ejemplo 9 — contar la evidencia del CSV
+**Requiere ejecutar primero el monitor integrado.** Guardar este ejemplo junto a memoria.csv.
+```python
+from pathlib import Path
+import csv
+
+ruta_csv = Path(__file__).resolve().parent / "memoria.csv"
+
+if not ruta_csv.exists():
+    raise SystemExit("Primero ejecute el monitor para crear memoria.csv")
+
+conteos = {"NORMAL": 0, "ALERTA": 0, "ERROR": 0}
+
+with ruta_csv.open(newline="", encoding="utf-8") as archivo:
+    for fila in csv.DictReader(archivo):
+        estado = fila["estado"]
+
+        if estado in conteos:
+            conteos[estado] += 1
+
+for estado, cantidad in conteos.items():
+    print(estado, ":", cantidad)
+```
+
+**Qué comprobar:** los conteos corresponden a las filas, sin incluir el encabezado. Si un estado tiene cero, revisar qué prueba falta; no inventar registros.
+Contar estados no demuestra por sí solo que sean correctos: hay que comparar porcentaje y umbral.
+
 <a id="conclusiones-con-evidencia"></a>
 
 ### Cómo construir conclusiones con evidencia
@@ -253,6 +672,46 @@ Para el fallo:
 > Al usar la ruta inexistente, en [fila/hora] se registró ERROR con [detalle] y valores de medición vacíos. Tras restaurarla, [fila/hora] volvió a registrar datos válidos. Se comprobó la restauración manual del acceso a la fuente, no una falla física.
 
 Una conclusión no es “aprendimos mucho”, “el programa funciona” o un resultado copiado del ejemplo. Debe indicar qué evidencia la respalda.
+
+#### Ejemplo 10 — comprobar una fila antes de interpretarla
+**Requiere memoria.csv del monitor**, junto al archivo .py.
+```python
+from pathlib import Path
+import csv
+import math
+
+ruta_csv = Path(__file__).resolve().parent / "memoria.csv"
+
+if not ruta_csv.exists():
+    raise SystemExit("Primero ejecute el monitor para crear memoria.csv")
+
+with ruta_csv.open(newline="", encoding="utf-8") as archivo:
+    for fila in csv.DictReader(archivo):
+        if fila["estado"] == "ERROR":
+            continue  # No calcular con mediciones ausentes
+
+        total = int(fila["mem_total_kib"])
+        disponible = int(fila["mem_disponible_kib"])
+        umbral = float(fila["umbral_pct"])
+        guardado = float(fila["porcentaje_usado"])
+
+        recalculado = (total - disponible) / total * 100
+        esperado = "ALERTA" if recalculado >= umbral else "NORMAL"
+
+        print("Fecha:", fila["fecha_hora"])
+        print("Total:", total, "| Disponible:", disponible)
+        print("Porcentaje recalculado:", recalculado)
+        print("Coincide el cálculo:", math.isclose(guardado, recalculado))
+        print("Estado esperado:", esperado)
+        print("Estado registrado:", fila["estado"])
+        break  # Revisar una fila válida como ejemplo
+
+    else:
+        print("No hay filas válidas para comprobar todavía.")
+```
+
+**Qué comprobar:** cálculo consistente y estado conforme al umbral de esa fila. Se presupone el CSV del monitor sin alteraciones manuales; no es un validador general de cualquier archivo.
+Con estos datos se completa el párrafo del informe. **El código produce evidencia; el estudiante redacta y limita la interpretación.**
 
 ## Entregable de hoy — antes de terminar la sesión
 Entregar **un ZIP por grupo en Teams**, con nombre `grupoXX_monitoreo_linux_2026-11-04.zip`:
@@ -293,8 +752,23 @@ La aplicación integrada tendrá que cambiar adquisición y formato: puerto USB 
 
 Próximos pasos del curso: enlace USB serial u otra comunicación seleccionada, SQLite, dashboard y ejecución como servicio. El control esencial debe diseñarse para continuar ante una interrupción de la supervisión.
 
+### Ejemplo de una futura fuente ESP32
+**Mensaje ilustrativo**, sin conexión USB implementada. Se muestra solo cómo cambiaría la interpretación de la fuente; no sustituye las mediciones RAM del laboratorio:
+```python
+import json
+
+mensaje = '{"temperatura_c": 25.5}'  # Ejemplo, todavía no viene de un puerto
+datos = json.loads(mensaje)  # Interpreta el formato JSON
+temperatura = float(datos["temperatura_c"])
+
+print("Valor recibido en el ejemplo:", temperatura, "°C")
+```
+
+En la integración real, el puerto o la red proporcionarán el mensaje y habrá que validar campos, unidades, tiempos y recuperación antes de clasificar y guardar.
+
 ## Referencias
 - [Lab 09](../README.md), [Lab 10](../../lab-10-uart-esp32-raspberry/README.md), [Lab 11](../../lab-11-sqlite-dashboard-servicio/README.md).
 - [Normas](../../../NORMAS_DE_CLASE.md), [Evaluación](../../../EVALUACION.md).
 - Linux: `/proc/meminfo` y [documentación proc](https://docs.kernel.org/filesystems/proc.html).
 - [Python csv](https://docs.python.org/3/library/csv.html), [pathlib](https://docs.python.org/3/library/pathlib.html).
+
