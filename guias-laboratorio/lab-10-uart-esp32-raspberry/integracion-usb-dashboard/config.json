@@ -1,0 +1,10 @@
+{
+  "puerto": "auto",
+  "baudrate": 115200,
+  "variable": "temperatura",
+  "unidad": "C",
+  "minimo": -40,
+  "maximo": 80,
+  "umbral": null,
+  "sin_datos_s": 10
+}
