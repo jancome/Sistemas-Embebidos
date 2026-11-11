@@ -19,3 +19,7 @@ Persistir y visualizar datos, ejecutar la aplicación automáticamente y recuper
 ## Evidencia
 
 Esquema de base, registros, dashboard, archivo de servicio, estado del servicio, logs y prueba de recuperación.
+
+## Implementación guiada
+
+[Práctica compacta de integración USB y dashboard](../lab-10-uart-esp32-raspberry/integracion-usb-dashboard/README.md): receptor Python, SQLite, interfaz local, generador de servicio y evidencias. Consultar los límites de la verificación y ensayar con el hardware real antes de la clase.
