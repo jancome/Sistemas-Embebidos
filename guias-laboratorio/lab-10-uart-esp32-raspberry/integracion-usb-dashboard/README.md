@@ -25,6 +25,8 @@ Al finalizar debemos poder seguir una misma lectura desde el mensaje del ESP32 h
 
 Antes de empezar, leer el [marco teórico de SQLite y dashboard](marco-teorico.md). Incluye ejemplos de tablas, consultas y estados.
 
+Para profundizar, consultar [bases de datos: SQL, SQLite y MySQL](bases-de-datos.md). Las palabras clave se explican en un [glosario con ejemplos](glosario.md).
+
 ## Dónde haremos cada cosa
 
 | Acción | Equipo o aplicación |
@@ -81,7 +83,11 @@ monitor_esp32/
   requirements.txt
   ejemplo_sqlite.py
   consultar_datos.py
+  consultas_guiadas.py
   generar_servicio.py
+  marco-teorico.md
+  bases-de-datos.md
+  glosario.md
   templates/
     dashboard.html
   esp32_dht22/
@@ -122,7 +128,7 @@ Desconectar la alimentación antes de cablear. Seguir las etiquetas:
 | GND / − | GND | Referencia eléctrica común |
 | DATA / S | GPIO4, si está expuesto y libre en la placa | Lectura digital |
 
-GPIO4 es el identificador del ESP32, no el cuarto pin del conector de Raspberry. Si se utiliza otro GPIO disponible, cambiar PIN_DHT en el firmware.
+[GPIO4](glosario.md#gpio-pullup) es el identificador del ESP32, no el cuarto pin del conector de Raspberry. Si se utiliza otro GPIO disponible, cambiar PIN_DHT en el firmware.
 
 En este montaje el sensor se alimenta a 3,3 V y su módulo debe ser compatible con ese voltaje. No conectar una señal de 5 V directamente al ESP32. El YF-S201 necesita un montaje de adaptación distinto y no se sustituye directamente por este módulo.
 
@@ -356,6 +362,16 @@ python consultar_datos.py
 
 [consultar_datos.py](consultar_datos.py) muestra cantidad de mediciones, últimas filas y eventos. Comprueba que existe la base antes de abrirla para evitar crear por accidente un archivo vacío en otra carpeta.
 
+Para explorar filtros, alertas, cantidad de filas y resúmenes por nodo, ejecutar también:
+
+~~~bash
+python consultas_guiadas.py
+~~~
+
+Muestra cada instrucción, sus parámetros y su resultado. Abre la base en modo de solo lectura. Si no hay alertas o el filtro no encuentra registros, puede mostrar que no hay filas; no genera datos para completar el ejemplo.
+
+El [capítulo de bases de datos](bases-de-datos.md) explica cómo pasar de la pregunta a la consulta y cómo interpretar cada resultado.
+
 La consulta principal es:
 
 ~~~sql
@@ -505,9 +521,12 @@ Se mantienen los demás requisitos del proyecto final, incluidos firmware modula
 ## Referencias
 
 - [Marco teórico: SQLite y dashboard](marco-teorico.md).
+- [Bases de datos: argumentos y consultas explicadas](bases-de-datos.md).
+- [Glosario de términos](glosario.md).
 - [Instalación de ESP32 en Arduino IDE](https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html).
 - [DHT22](https://learn.adafruit.com/dht/overview) y [pull-up/conexión](https://learn.adafruit.com/dht/connecting-to-a-dhtxx-sensor).
 - [Python sqlite3](https://docs.python.org/3/library/sqlite3.html).
 - [Flask](https://flask.palletsprojects.com/en/stable/quickstart/).
 - [pySerial](https://pyserial.readthedocs.io/en/latest/shortintro.html).
 - [Laboratorio 10](../README.md), [laboratorio 11](../../lab-11-sqlite-dashboard-servicio/README.md), [proyecto final](../../../PROYECTO_FINAL.md).
+
