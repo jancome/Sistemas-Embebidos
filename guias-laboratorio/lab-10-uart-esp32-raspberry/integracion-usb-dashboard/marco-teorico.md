@@ -6,6 +6,12 @@ Los términos enlazados, como [JSON](glosario.md#json) o [transacción](glosario
 
 Un sensor produce una lectura de una magnitud física. Por ejemplo, un DHT22 mide temperatura ambiente y humedad relativa. El ESP32 consulta esa lectura y la transmite. La Raspberry recibe el mensaje, comprueba sus datos, los guarda y permite consultarlos.
 
+Pensemos en un salón: al comenzar la clase marca 25,4 °C. Más tarde alguien cierra la ventana. Para investigar si hubo un cambio necesitamos conocer valores, horas y condiciones observadas, no solo el último número. Este montaje reúne esas lecturas para poder revisarlas.
+
+![Una misma lectura representada como mensaje, registro y valor del panel](imagenes/recorrido-lectura.svg)
+
+El dibujo usa datos ilustrativos. Que coincidan en las tres representaciones muestra el recorrido de esa lectura; todavía no demuestra que el sensor tenga la exactitud que requiere una aplicación concreta.
+
 Cada parte responde una pregunta:
 
 | Parte | Pregunta que resuelve |
@@ -25,6 +31,8 @@ Un PC también puede recibir datos, utilizar SQLite y mostrar una página. La Ra
 No basta con conectar la alimentación: necesita sistema operativo, almacenamiento, fuente adecuada y configuración. Para operar sin abrir una terminal se prepara un servicio. La elección se justifica cuando el proyecto necesita funcionar de manera independiente del portátil; si solo se hace una prueba ocasional, el PC puede ser suficiente.
 
 ESP32 conserva la adquisición del sensor. Raspberry reúne recepción, histórico e interfaz. Distribuir responsabilidades facilita comprobar dónde ocurrió un fallo.
+
+El DHT22 entrega información digital mediante su protocolo de sensor; la biblioteca DHT se ocupa de leerla. Después, el ESP32 crea el JSON. Son dos comunicaciones distintas: sensor → GPIO del ESP32 y ESP32 → USB de Raspberry. El DHT22 no genera por sí solo la página web ni una fila SQL.
 
 ## Lectura, mensaje y registro
 
@@ -54,9 +62,13 @@ Raspberry añade una [marca de tiempo en UTC](glosario.md#fecha-utc) al recibir.
 
 Por ejemplo, "valor": 25.4 comunica un número, mientras que "valor": "25.4" comunica texto. Ambos pueden formar parte de un JSON correcto, pero el segundo incumple el formato de medición que espera el receptor. Entender el formato y [validar el significado](glosario.md#validacion) son comprobaciones distintas.
 
+Es parecido a llenar una ficha de laboratorio con casillas «equipo», «lectura» y «unidad»: el formato hace que quien la recibe sepa dónde buscar. Si la casilla destinada a una temperatura contiene «no sé», la ficha puede estar completa como texto, pero no sirve para calcular un promedio.
+
 ## Qué es una base de datos
 
 Es una forma organizada de conservar información y recuperarla mediante consultas. En una base relacional los datos se distribuyen en tablas.
+
+Una planilla de asistencia ofrece una referencia conocida: cada fila contiene un estudiante y cada columna un dato, como nombre, grupo y hora de entrada. En nuestra tabla, cada fila contiene una recepción del sensor. Consultar es pedir una selección de esas filas, del mismo modo que buscarías solo a quienes pertenecen a un grupo.
 
 La necesitamos porque la lectura visible ahora no cuenta por sí sola lo que pasó antes. Si el dashboard muestra 25 °C, todavía no sabemos si hace un minuto hubo 30 °C, qué nodo lo midió o si dejó de transmitir. Guardar cada lectura con su origen, unidad y hora permite investigar esas preguntas.
 
@@ -86,6 +98,8 @@ Ejemplo ilustrativo:
 - **[Tipo de dato](glosario.md#tipos):** indica la clase de información, por ejemplo entero, real o texto.
 
 El id de la base no es la secuencia del ESP32. La Raspberry puede seguir asignando nuevos id aunque se reinicie la secuencia del emisor.
+
+Es como numerar las entradas de un registro del laboratorio: una persona puede volver a empezar la numeración de sus muestras, pero el registro general conserva su propia identificación. Al comprobar el dashboard usamos el ID de la fila, junto con el nodo y la secuencia que recibió.
 
 ## Qué es SQLite
 
@@ -122,6 +136,8 @@ Un archivo local también requiere espacio, permisos y copias de respaldo. SQLit
 
 ### Qué cambiaría con MySQL
 
+![Comparación entre SQLite dentro de la aplicación y una aplicación conectada a MySQL](imagenes/sqlite-mysql.svg)
+
 MySQL normalmente añade un servicio de base de datos al que se conecta la aplicación. Ese servicio puede estar en Raspberry o en otro equipo. La página sigue necesitando una aplicación que reciba las peticiones y consulte los datos.
 
 | Aspecto | SQLite en esta práctica | MySQL en una arquitectura con servidor |
@@ -146,6 +162,8 @@ Por ejemplo, un monitor local instalado junto a una máquina puede usar SQLite. 
 6. El registro queda disponible para una consulta.
 
 Una [transacción](glosario.md#transaccion) agrupa cambios que deben confirmarse o revertirse. Confirmar se conoce como commit. Esto permite distinguir «intenté guardar» de «la escritura se confirmó». SQLite ayuda a mantener la consistencia de la base; no recupera mensajes que nunca llegaron ni elimina la necesidad de cuidar el almacenamiento.
+
+Al completar un formulario, escribir en las casillas no siempre significa que ya se envió: todavía hay una confirmación. Con commit ocurre algo comparable: el programa confirma los cambios pendientes. rollback permite descartarlos antes de confirmar; no borra automáticamente una medición ya confirmada.
 
 En Python:
 
@@ -257,6 +275,8 @@ Guarda situaciones de operación, como una trama rechazada o un error reportado 
 
 **[NULL](glosario.md#null)** representa ausencia de un valor. No significa cero ni una cadena vacía. Si no hay umbral, la base puede conservar NULL en ese campo.
 
+Piensa en una calificación pendiente: dejarla sin asignar no equivale a poner 0,0. De la misma manera, no tener un umbral configurado es diferente de fijarlo en cero. Una temperatura de 0 °C también puede ser una medición real.
+
 ## Del CSV a SQLite
 
 [CSV](glosario.md#csv) es un archivo de texto tabular útil para intercambio y análisis sencillo. SQLite permite mantener tablas y realizar consultas sin reescribir el archivo completo desde nuestro programa.
@@ -266,6 +286,12 @@ En la práctica anterior el programa producía un CSV. Ahora guarda en SQLite y 
 ## Qué es un dashboard
 
 Es un panel que reúne datos para que el usuario pueda interpretar el estado del sistema. Puede incluir valores, indicadores, gráficas y tablas.
+
+El tablero de un carro reúne velocidad, combustible y testigos para que puedas interpretarlos sin revisar cada señal por separado. Nuestro dashboard reúne lectura, hora y estado; además permite revisar los registros anteriores.
+
+![Panel del programa con valores de prueba, contador, estado y registros identificados](imagenes/dashboard-ejemplo.png)
+
+La captura sirve para reconocer los elementos; no reemplaza una medición física del grupo.
 
 En este proyecto responde:
 
@@ -365,6 +391,9 @@ No se espera que cada actualización de pantalla agregue una fila. La cantidad d
 
 El dato anterior puede conservarse como histórico. Debe mostrarse como antiguo, no como una nueva lectura ni como cero. Un umbral didáctico no es una declaración de peligro físico.
 
+Para probarlo no hace falta cambiar la temperatura del salón: se cambia la regla. Si el sensor está alrededor de 25 °C, un umbral de 24 puede generar ALERTA y uno de 35 puede producir NORMAL. Después de guardar la configuración hay que reiniciar app.py. La [guía](README.md#comprobar-normal-y-alerta) muestra el ensayo completo.
+
+Mostrar 25,40 en lugar de 25,4 no vuelve más exacto al sensor. Los decimales visibles son un formato de presentación. Las conclusiones sobre cambios pequeños requieren considerar las especificaciones y el comportamiento del sensor, además de observar varias lecturas.
 ## Qué cambia al cerrar o desconectar
 
 | Situación | Efecto esperado |

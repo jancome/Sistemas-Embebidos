@@ -50,7 +50,7 @@
   </section>
   <section class="table">
     <h2>Últimos registros</h2>
-    <table><thead><tr><th>Hora de recepción</th><th>Nodo</th><th>Secuencia</th><th>Valor</th><th>Estado</th></tr></thead>
+    <table><thead><tr><th>ID</th><th>Hora de recepción</th><th>Nodo</th><th>Secuencia</th><th>Valor</th><th>Estado</th></tr></thead>
       <tbody id="rows"></tbody></table>
   </section>
   <p class="foot">La última medición se conserva como histórico cuando se pierde la comunicación. Se indica si dejó de ser reciente.</p>
@@ -107,7 +107,7 @@ async function update(){
     el('range').textContent=history.length?'Últimas '+history.length+' mediciones guardadas; el eje horizontal muestra hora de recepción.':'Esperando una lectura real del sensor.';
     el('rows').replaceChildren(...history.slice(-10).reverse().map(row=>{
       const tr=document.createElement('tr');
-      for(const value of [date(row.fecha_hora),row.nodo,row.secuencia,number(row.valor)+' '+unit,row.estado]){
+      for(const value of [row.id,date(row.fecha_hora),row.nodo,row.secuencia,number(row.valor)+' '+unit,row.estado]){
         const td=document.createElement('td');td.textContent=value;tr.appendChild(td);
       }return tr;
     }));

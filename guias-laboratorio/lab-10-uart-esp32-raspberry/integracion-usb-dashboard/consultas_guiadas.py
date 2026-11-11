@@ -1,6 +1,7 @@
 """Consultas de aprendizaje sobre los datos reales, sin modificar la base."""
 from contextlib import closing  # Cierra la conexión al terminar
 from pathlib import Path  # Localiza la base junto a este programa
+import argparse  # Lee opciones escritas después del nombre del programa
 import sqlite3  # Acceso a SQLite desde Python
 
 ARCHIVO = Path(__file__).resolve().parent / "mediciones.sqlite3"
@@ -57,6 +58,15 @@ CONSULTAS = [
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--id", type=int, metavar="NUMERO",
+        help="Consultar una fila por su ID de SQLite, como aparece en el dashboard",
+    )
+    opciones = parser.parse_args()
+    if opciones.id is not None and opciones.id <= 0:
+        parser.error("El ID debe ser un entero mayor que cero")
+
     if not ARCHIVO.is_file():
         raise SystemExit(
             "No existe mediciones.sqlite3 junto a este archivo. "
@@ -70,6 +80,20 @@ def main():
         print("Base consultada:", ARCHIVO)
         print("Selección:", VARIABLE, "| Unidad:", UNIDAD)
         print("Se muestran datos recibidos; no se insertan valores de ejemplo.")
+
+        if opciones.id is not None:
+            fila = db.execute(
+                """SELECT id, fecha_hora, nodo, variable, valor, unidad,
+                          secuencia, estado, umbral, humedad_pct
+                   FROM mediciones WHERE id = ?""",
+                (opciones.id,),
+            ).fetchone()
+            if fila is None:
+                print(f"No hay una medición con ID {opciones.id} en esta base.")
+            else:
+                print("\nMedición elegida:")
+                print(dict(fila))
+            return
 
         for titulo, sql, parametros in CONSULTAS:
             print("\n" + titulo)

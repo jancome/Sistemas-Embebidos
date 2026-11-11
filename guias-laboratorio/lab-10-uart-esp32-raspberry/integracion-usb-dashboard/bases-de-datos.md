@@ -19,8 +19,12 @@ Sin guardar registros, una pantalla que se actualiza sustituye lo que veíamos a
 
 Una base de datos aporta organización y consultas. No demuestra por sí sola que el sensor sea preciso: una medición incorrecta también podría quedar almacenada si el receptor no la valida.
 
+Una comparación cotidiana es la planilla de asistencia: podemos contar cuántos estudiantes llegaron o buscar solo los de un grupo sin volver a preguntar a todo el salón. Con las mediciones ocurre lo mismo: consultamos lo que ya quedó registrado.
+
 <a name="sqlite-y-mysql"></a>
 ## SQL, SQLite y MySQL: qué cambia entre ellos
+
+![Dónde está el motor y cómo accede Python a SQLite o MySQL](imagenes/sqlite-mysql.svg)
 
 [SQL](glosario.md#sql) es el lenguaje de las instrucciones. [SQLite](glosario.md#sqlite) y [MySQL](glosario.md#mysql) son motores que permiten utilizar ese lenguaje. No se instala «SQL» como si fuera el nombre de una aplicación única.
 
@@ -152,6 +156,14 @@ python consultas_guiadas.py
 
 El archivo debe estar dentro de la carpeta descargada de la práctica. La base real debe haber sido creada por app.py. El programa no crea una base vacía si no la encuentra.
 
+Para comprobar una fila del dashboard, toma su ID de la tabla y consulta ese mismo número. Por ejemplo:
+
+~~~bash
+python consultas_guiadas.py --id 12
+~~~
+
+12 es un ejemplo. Sustitúyelo por el ID que aparece en tu panel. La secuencia del ESP32 es otro campo y puede tener un número diferente.
+
 Los bloques SQL siguientes se ejecutan desde Python mediante db.execute o una herramienta compatible con SQLite. No son comandos para pegar directamente en Bash. El archivo consultas_guiadas.py permite ver las instrucciones y ejecutarlas sin instalar una aplicación adicional.
 
 ## Datos ilustrativos para razonar los resultados
@@ -168,6 +180,8 @@ Las consultas pueden estudiarse primero con este conjunto hipotético. Todas las
 | 6 | 15:00:09 | esp32-01 | 25.8 | NORMAL |
 
 Estas filas no se insertan automáticamente en la base del sensor. Los resultados reales dependen de lo que reciba el sistema. En el mensaje original se utiliza OK; NORMAL y ALERTA son la clasificación que calcula Raspberry.
+
+El segundo nodo sirve para explicar GROUP BY. La aplicación entregada atiende un puerto serial de ESP32; conectar dos placas a la Raspberry no agrega automáticamente dos receptores. Para trabajar con varios puertos hace falta ampliar esa parte de la aplicación y comprobarla.
 
 ### 1. ¿Cuáles fueron las últimas lecturas?
 
@@ -242,7 +256,7 @@ GROUP BY nodo
 ORDER BY nodo;
 ~~~
 
-GROUP BY forma un conjunto por cada nodo. El ejemplo produce:
+GROUP BY forma un conjunto por cada nodo. Es la misma idea de calcular la asistencia por grupo: primero se separan las filas y después se calcula un resultado para cada conjunto. El ejemplo produce:
 
 | nodo | cantidad | promedio |
 |---|---:|---:|

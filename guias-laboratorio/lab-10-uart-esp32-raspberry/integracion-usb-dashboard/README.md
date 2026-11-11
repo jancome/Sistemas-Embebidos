@@ -2,11 +2,31 @@
 
 En esta práctica construiremos un monitor de temperatura y humedad. El ESP32 toma la lectura del sensor, la envía por USB y la Raspberry la guarda y la presenta en una página.
 
+Imagina que quieres saber cómo cambia la temperatura del salón durante una jornada. Mirar una cifra ahora no permite recordar lo que ocurrió antes. Vamos a dejar un registro que se pueda revisar después y un panel para ver las últimas lecturas.
+
+![Recorrido de una lectura: del DHT22 a una fila de SQLite y al dashboard](imagenes/recorrido-lectura.svg)
+
+El dibujo utiliza valores de ejemplo. En la práctica se trabaja con las lecturas del sensor.
+
 ~~~text
 Sensor DHT22 → ESP32 → USB → Programa Python → SQLite → Dashboard
 ~~~
 
 Al finalizar debemos poder seguir una misma lectura desde el mensaje del ESP32 hasta la fila de la base de datos y el valor mostrado en pantalla.
+
+## Por dónde empezar
+
+Para seguir los pasos necesitas ver el escritorio de Raspberry, poder abrir su navegador y disponer del módulo DHT22 indicado en materiales. Si todavía no llegas al escritorio, completa primero [la preparación del equipo](preparacion.md).
+
+Usa esta página como recorrido de trabajo. El [marco teórico](marco-teorico.md) explica por qué hacemos cada parte y el [glosario](glosario.md) aclara las palabras enlazadas.
+
+| Tramo | Qué debe funcionar antes de seguir |
+|---|---|
+| Pasos 1 a 4 | El Monitor serial muestra lecturas del sensor |
+| Pasos 5 a 9 | Raspberry recibe mensajes y el dashboard abre |
+| Pasos 10 a 12 | Puedes consultar una fila y explicar su estado |
+| Pasos 13 y 14 | Puedes mostrar qué ocurre ante un error o una desconexión |
+| Paso 15 | El receptor vuelve a funcionar después de reiniciar Raspberry |
 
 ## Los conceptos que vamos a utilizar
 
@@ -23,7 +43,7 @@ Al finalizar debemos poder seguir una misma lectura desde el mensaje del ESP32 h
 
 **SQLite guarda; el dashboard presenta.** Cerrar la página no borra el histórico. El programa receptor debe seguir funcionando para recibir nuevas lecturas.
 
-Antes de empezar, leer el [marco teórico de SQLite y dashboard](marco-teorico.md). Incluye ejemplos de tablas, consultas y estados.
+El [marco teórico de SQLite y dashboard](marco-teorico.md) incluye ejemplos de tablas, consultas y estados para acompañar los pasos.
 
 Para profundizar, consultar [bases de datos: SQL, SQLite y MySQL](bases-de-datos.md). Las palabras clave se explican en un [glosario con ejemplos](glosario.md).
 
@@ -40,6 +60,10 @@ Para profundizar, consultar [bases de datos: SQL, SQLite y MySQL](bases-de-datos
 
 La terminal del Mac y la terminal del escritorio de Raspberry pertenecen a equipos distintos. En las instrucciones se indica cuál utilizar.
 
+Cuando veas jancome@RaspberryJC o (.venv) antes de un comando, son indicaciones de la terminal: no se escriben. Copia solo las líneas del bloque. Ejecutar significa pegarlas y pulsar Enter.
+
+Para pasar texto del Mac al escritorio remoto, utiliza **Paste to remote / Pegar en remoto** en la barra de Connect. Después, si hace falta pegar en la terminal de Raspberry, utiliza Ctrl+Shift+V. Ctrl+C en una terminal detiene el programa que está corriendo.
+
 ## Materiales
 
 - Raspberry Pi con Raspberry Pi OS, fuente, refrigeración y acceso al escritorio.
@@ -54,7 +78,7 @@ Un sensor suelto de cuatro pines puede requerir una resistencia externa. Revisar
 
 ## 1. Descargar los archivos
 
-En el navegador abrir [Sistemas-Embebidos](https://github.com/jancome/Sistemas-Embebidos), pulsar **Code → Download ZIP** y descomprimir.
+Haz la descarga en el computador y también en el navegador **del escritorio de Raspberry**. En ambos, abrir [Sistemas-Embebidos](https://github.com/jancome/Sistemas-Embebidos), pulsar **Code → Download ZIP** y descomprimir. Descargarlo solo en el Mac no lo copia automáticamente a Raspberry.
 
 Dentro de la carpeta descargada buscar:
 
@@ -66,7 +90,16 @@ guias-laboratorio/
 
 Se necesita una copia en el computador para cargar el firmware y otra en Raspberry para ejecutar el receptor.
 
-En el explorador de archivos de Raspberry, copiar la carpeta integracion-usb-dashboard a la carpeta personal y renombrarla **monitor_esp32**. Así utilizaremos una ruta sencilla:
+En Raspberry:
+
+1. Abrir el explorador de archivos con el icono de carpeta.
+2. Entrar a Downloads / Descargas y extraer el ZIP si aún no está extraído.
+3. Seguir la ruta anterior hasta integracion-usb-dashboard.
+4. Copiar esa carpeta completa.
+5. Abrir Home / Carpeta personal y pegarla allí.
+6. Cambiar su nombre a **monitor_esp32**.
+
+Así utilizaremos una ruta sencilla:
 
 ~~~text
 /home/tu_usuario/monitor_esp32
@@ -88,6 +121,8 @@ monitor_esp32/
   marco-teorico.md
   bases-de-datos.md
   glosario.md
+  preparacion.md
+  imagenes/
   templates/
     dashboard.html
   esp32_dht22/
@@ -122,6 +157,10 @@ La identificación de la placa, las descargas y la carga del firmware deben comp
 
 Desconectar la alimentación antes de cablear. Seguir las etiquetas:
 
+![Conexiones lógicas del módulo DHT22, ESP32-S3 y Raspberry mediante USB](imagenes/conexiones.svg)
+
+El dibujo muestra las señales, no la posición física de los pines. Identifica las etiquetas en tu módulo y en el pinout de tu placa.
+
 | DHT22 | ESP32-S3 | Función |
 |---|---|---|
 | VCC / + | 3V3 | Alimentación |
@@ -143,6 +182,8 @@ En este montaje el sensor se alimenta a 3,3 V y su módulo debe ser compatible c
 5. Abrir **Monitor serial** y seleccionar **115200 baudios**.
 
 Baudios es la velocidad configurada para la comunicación serial. El emisor y el receptor deben usar la misma.
+
+El Monitor serial es una ventana de Arduino IDE para ver lo que envía la placa. En el ESP32-S3 puede haber dos conectores USB con funciones distintas: identifica el que corresponde a la placa elegida y utiliza el que ya permitió cargar y ver mensajes.
 
 Si la placa utiliza USB nativo, puede requerir **USB CDC On Boot → Enabled** para que Serial salga por ese conector. Si usa un puente USB-UART, la configuración debe corresponder a ese puente. Consultar el manual de la placa y utilizar después el mismo conector que funcionó.
 
@@ -180,6 +221,8 @@ DHT dht(PIN_DHT, DHT22);                   // Sensor que se va a consultar
 
 En setup, Serial.begin(115200) prepara la comunicación y dht.begin() inicializa el sensor. setup se ejecuta una vez al arrancar. loop se repite: espera el intervalo, pide temperatura y humedad, comprueba si hubo fallo y envía el JSON. millis() informa el tiempo transcurrido desde el arranque; no es la fecha del calendario.
 
+3000 milisegundos equivalen a tres segundos porque un segundo contiene 1000 milisegundos. Es el mismo tipo de conversión de unidades que utilizamos al pasar de miligramos a gramos.
+
 Estas dos instrucciones obtienen los valores:
 
 ~~~cpp
@@ -213,7 +256,7 @@ Si aparece No such file or directory, revisar dónde se copió la carpeta y resp
 
 ## 6. Crear el entorno Python
 
-Desde esa carpeta:
+Un [entorno virtual](glosario.md#entorno-virtual) guarda las bibliotecas Python del proyecto. Desde esa carpeta:
 
 ~~~bash
 python3 -m venv .venv
@@ -228,6 +271,8 @@ python -m pip install -r requirements.txt
 | python -m pip install -r requirements.txt | Instala las dependencias indicadas en el archivo |
 
 El entorno evita mezclar las bibliotecas de la práctica con las del sistema. requirements.txt incluye Flask y pySerial.
+
+Puedes pensar en .venv como la caja de herramientas de este proyecto: activar la caja hace que esta terminal utilice las bibliotecas que guardamos allí. Al abrir otra terminal, hay que activarla otra vez.
 
 **Resultado que comprobar:** la instalación termina sin errores y la terminal suele mostrar (.venv) al inicio.
 
@@ -301,6 +346,8 @@ Si hay varios USB, auto no elige uno al azar. Escribir la ruta identificada. Si 
 
 Guardar después de editar. El archivo JSON usa comillas dobles y no admite comentarios con #.
 
+Para editarlo desde el escritorio, busca config.json en monitor_esp32 y ábrelo con un editor de texto. También puedes usar Thonny, Archivo → Abrir, seleccionando todos los archivos si no aparece JSON. Guarda con Ctrl+S. Los fragmentos explicativos de esta guía no se pegan completos encima del programa.
+
 ## 9. Ejecutar el receptor y abrir la página
 
 Con la terminal en monitor_esp32 y .venv activo:
@@ -322,6 +369,8 @@ http://127.0.0.1:5000
 **Resultado que comprobar:** se abre el dashboard. Al llegar mensajes válidos aparecen temperatura, humedad, hora y registros. La cantidad guardada debe aumentar.
 
 La página se actualiza cada dos segundos y el sensor se consulta cada tres. Actualizar la página no obliga a obtener otra lectura. Los cambios del DHT22 pueden tardar en reflejarse.
+
+Antes de seguir, observa al menos diez registros: la hora o la secuencia deben avanzar aunque la temperatura se mantenga igual. Un salón estable puede producir muchas lecturas con el mismo valor; eso no implica que el programa esté detenido.
 
 ## 10. Aprender SQLite con un ejemplo separado
 
@@ -383,11 +432,28 @@ LIMIT 5;
 
 Se lee: “mostrar estos campos de la tabla mediciones, empezando por los id mayores y devolver como máximo cinco filas”.
 
-**Resultado que comprobar:** una fila coincide con el valor, nodo y hora del dashboard. La base guarda UTC y la página convierte la hora a la zona del navegador.
+Para comprobar una lectura concreta:
+
+1. En la tabla **Últimos registros** del dashboard, elige una fila y anota su **ID**, nodo, secuencia, valor y hora.
+2. En la segunda terminal, consulta ese ID. Si elegiste 12:
+
+   ~~~bash
+   python consultas_guiadas.py --id 12
+   ~~~
+
+3. Sustituye 12 por el ID que realmente anotaste. Compara los campos de esa fila.
+
+La consulta por ID evita que la comparación dependa del último número de la tarjeta, que puede cambiar mientras escribes. La base guarda UTC y la página convierte la hora a la zona del navegador; 15:00 UTC corresponde a 10:00 en Colombia.
+
+El ID pertenece a la base. La secuencia pertenece al ESP32. Pueden ser distintos aunque describan la misma recepción.
 
 mediciones.sqlite3 es un archivo de base de datos, no un texto para editar directamente. Los archivos con sufijos -wal y -shm que puedan aparecer son auxiliares de SQLite; no borrarlos mientras la aplicación funciona.
 
 ## 12. Interpretar el dashboard
+
+![Dashboard del programa con datos de ejemplo para reconocer sus elementos](imagenes/dashboard-ejemplo.png)
+
+Esta captura usa datos de prueba. En tu pantalla deben aparecer el nodo y las mediciones de tu montaje.
 
 | Elemento | Qué responde |
 |---|---|
@@ -401,6 +467,27 @@ mediciones.sqlite3 es un archivo de base de datos, no un texto para editar direc
 La página solicita información a /api/estado. Python consulta SQLite y devuelve un resumen; la página lo representa. El navegador no lee el archivo SQLite directamente.
 
 **Importante:** una lectura antigua visible no equivale a un sensor conectado ahora. Revisar hora y estado, no solo el número.
+
+### Comprobar NORMAL y ALERTA
+
+La configuración inicial tiene umbral null, por eso no crea alertas por temperatura. Para probar la regla sin calentar nada:
+
+1. Mira la temperatura actual. Supongamos que está alrededor de 25 °C.
+2. En la primera terminal, detén app.py con Ctrl+C.
+3. Abre config.json y cambia **solo el valor** de umbral a 24. Conserva la coma que ya tenía esa línea:
+
+   ~~~json
+   "umbral": 24,
+   ~~~
+
+4. Guarda y ejecuta otra vez python app.py.
+5. Cuando llegue una lectura válida de al menos 24 °C, el panel debe mostrar ALERTA.
+6. Repite la edición con un umbral superior a la lectura, por ejemplo 35 si el sensor sigue cerca de 25 °C. Detén, guarda y vuelve a ejecutar: las nuevas lecturas menores que 35 se clasifican NORMAL.
+7. Al terminar, decide y documenta el umbral del ensayo o restaura null.
+
+Elige números adecuados a la lectura que estás viendo; 24 y 35 son ejemplos. La regla es valor >= umbral. Una alerta en este ensayo significa que se cumplió esa regla, no que exista daño.
+
+Cambiar config.json mientras app.py sigue abierto no recarga los parámetros. Hay que reiniciar la aplicación. Las filas anteriores conservan el estado y el umbral con que se guardaron.
 
 ## 13. Probar una trama incorrecta
 
@@ -484,6 +571,20 @@ Los logs describen la operación y los fallos; no son la tabla de mediciones. No
 
 Finalmente reiniciar Raspberry de forma ordenada y comprobar que el receptor vuelve a recibir sin abrir la terminal. No reiniciar mientras se instalan actualizaciones.
 
+~~~bash
+sudo reboot
+~~~
+
+Connect se desconectará durante el reinicio. Vuelve a entrar cuando el dispositivo esté disponible y abre el navegador de Raspberry en la misma dirección del dashboard.
+
+Si necesitas regresar al trabajo manual, detén primero el servicio:
+
+~~~bash
+sudo systemctl stop monitor-esp32
+~~~
+
+Esto no lo deshabilita para el siguiente arranque. Si también quieres quitar su inicio automático, utiliza sudo systemctl disable monitor-esp32.
+
 ## Evidencias del informe
 
 Entregar según las condiciones de la tarea:
@@ -497,11 +598,34 @@ Entregar según las condiciones de la tarea:
 7. Desconexión, reconexión y arranque automático.
 8. Logs relevantes y explicación de las dificultades.
 
+En el informe, sigue una lectura de principio a fin: incluye el mensaje y una fila del panel, consulta su ID y explica qué significan sus campos. Después muestra una condición NORMAL, una ALERTA y una interrupción identificando lo que hiciste en cada caso. Una captura sin explicación no permite saber si el dato era actual o histórico.
+
 Cada conclusión debe señalar **acción, resultado observado y evidencia**. Por ejemplo: “desconectamos USB, el panel cambió de estado y el contador dejó de aumentar; al reconectarlo se añadieron filas nuevas”. Esto no demuestra recuperación de las lecturas perdidas.
 
 Para obtener una copia consistente de la base mientras se utiliza, se puede usar el método backup de SQLite. Para la entrega habitual basta la exportación CSV y las consultas/capturas indicadas; no borrar archivos auxiliares de una base activa.
 
 Se mantienen los demás requisitos del proyecto final, incluidos firmware modular/FreeRTOS y actuador o indicador, según el alcance acordado.
+
+## Preguntas para revisar lo aprendido
+
+Antes de entregar, intenta responderlas mirando tu propio montaje:
+
+1. Si cierras Connect en el computador, ¿qué tendría que seguir encendido para continuar guardando?
+2. ¿Dónde se ejecuta el programa que crea el JSON y dónde se guarda SQLite?
+3. ¿Por qué el ID de una fila puede ser distinto de la secuencia del ESP32?
+4. Si hay una lectura visible pero su hora no avanza, ¿qué revisarías antes de considerarla actual?
+5. ¿Por qué cambiar el umbral puede producir una alerta sin cambiar el sensor?
+
+<details>
+<summary>Comprobar el razonamiento</summary>
+
+1. Raspberry y ESP32 deben seguir alimentados y conectados, y el receptor debe continuar ejecutándose. Cerrar Connect no detiene por sí mismo la aplicación.
+2. El firmware crea el JSON en el ESP32. El receptor de Raspberry guarda los registros en la base local.
+3. SQLite asigna el ID a la fila; el ESP32 genera su contador desde el arranque.
+4. Revisaría estado, hora de recepción, conexión USB y ejecución del receptor. El número puede pertenecer al histórico.
+5. ALERTA es el resultado de comparar una lectura válida con una regla configurada; en esta prueba no representa una temperatura de daño.
+
+</details>
 
 ## Revisar problemas frecuentes
 
@@ -517,6 +641,9 @@ Se mantienen los demás requisitos del proyecto final, incluidos firmware modula
 | Address already in use | Otra aplicación ya utiliza el puerto; revisar servicio o copia manual |
 | Histórico sin datos nuevos | Consultar estado del puerto, antigüedad de lectura y eventos |
 | Error SQLite de escritura | Revisar logs, permisos y espacio disponible |
+| No cambia a ALERTA | Confirmar un umbral numérico, compararlo con la lectura y reiniciar app.py después de guardar |
+| La hora de la consulta difiere cinco horas | Comparar zona UTC de la base con la hora local del navegador |
+| La consulta por ID no encuentra la fila | Usar el ID de SQLite, no la secuencia del ESP32, y comprobar que es la misma carpeta/base |
 
 ## Referencias
 

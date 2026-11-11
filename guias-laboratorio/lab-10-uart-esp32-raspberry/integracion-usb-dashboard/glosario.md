@@ -241,6 +241,40 @@ La descarga CSV es una exportación del histórico. SQLite sigue siendo la base 
 
 ## Página y operación
 
+<a name="terminal"></a>
+### Terminal, prompt y comando
+
+La terminal es una ventana para dar instrucciones al sistema. El prompt indica que está esperando una orden; puede verse como estudiante@raspberry:~ $.
+
+Ese texto inicial no se copia. Si la instrucción es python app.py, solo se escribe esa parte y se pulsa Enter.
+
+La consola Python de Thonny suele mostrar >>> y espera código Python. Los comandos cd o source de esta guía van en la terminal Linux, no en esa consola.
+
+<a name="entorno-virtual"></a>
+### Biblioteca y entorno virtual
+
+Una biblioteca reúne funciones ya preparadas. La biblioteca DHT ayuda al firmware a leer el sensor; Flask y pySerial se utilizan desde Python para otras tareas.
+
+El entorno virtual .venv guarda las bibliotecas Python de este proyecto. Se parece a una caja de herramientas que seleccionamos para trabajar: source .venv/bin/activate hace que esa terminal utilice la caja elegida.
+
+Abrir otra terminal no activa automáticamente el mismo entorno. El entorno de Thonny también puede ser distinto.
+
+<a name="compilar"></a>
+### Compilar y cargar
+
+Compilar es transformar el código del firmware en un programa que pueda ejecutar la placa. Cargar es transferir ese programa al ESP32.
+
+El botón de verificar de Arduino IDE permite detectar errores de compilación. El de cargar añade la transferencia. Si se compila bien pero no se identifica el puerto o falla la conexión, la carga todavía puede fallar.
+
+El archivo .ino contiene el código del firmware. Los fragmentos de explicación no se añaden como si fueran otro programa completo.
+
+<a name="ssh"></a>
+### SSH
+
+Permite abrir una sesión de terminal en otro equipo a través de la red. En ssh estudiante@raspberry-g01.local, estudiante es el usuario de Raspberry y raspberry-g01.local es el nombre que se intenta localizar.
+
+SSH no muestra por sí mismo el escritorio. En esta práctica sirve como posible primer acceso para activar Connect; después puede utilizarse la pantalla compartida.
+
 <a name="dashboard"></a>
 ### Dashboard
 
