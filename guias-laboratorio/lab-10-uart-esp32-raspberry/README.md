@@ -29,3 +29,7 @@ Cuando se utilice UART se deben verificar TX, RX, GND, tensión lógica, baud ra
 ## Evidencia
 
 Diagrama, selección justificada, especificación del mensaje, código o configuración, datos válidos e inválidos y prueba de recuperación.
+
+## Práctica integradora compacta
+
+[Sensor ESP32 → USB → Raspberry → SQLite → dashboard](integracion-usb-dashboard/README.md). Base reutilizable para sesiones de tres horas, con sensor DHT22 de referencia, validación, histórico, servicio y pruebas de recuperación. Los grupos adaptan el mensaje al sensor de su proyecto.
