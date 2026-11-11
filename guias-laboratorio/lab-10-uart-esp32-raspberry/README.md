@@ -30,6 +30,8 @@ Cuando se utilice UART se deben verificar TX, RX, GND, tensión lógica, baud ra
 
 Diagrama, selección justificada, especificación del mensaje, código o configuración, datos válidos e inválidos y prueba de recuperación.
 
-## Práctica integradora compacta
+## Lectura de sensores y registro de datos
 
-[Sensor ESP32 → USB → Raspberry → SQLite → dashboard](integracion-usb-dashboard/README.md). Base reutilizable para sesiones de tres horas, con sensor DHT22 de referencia, validación, histórico, servicio y pruebas de recuperación. Los grupos adaptan el mensaje al sensor de su proyecto.
+[Sensor ESP32 → USB → Raspberry → SQLite → dashboard](integracion-usb-dashboard/README.md). Guía desde la conexión de un módulo DHT22 hasta el registro en SQLite y la visualización. Incluye comandos explicados, resultados esperados, consultas y pruebas de desconexión. Los grupos pueden adaptar el mensaje al sensor de su proyecto.
+
+[Marco teórico de SQLite y dashboard](integracion-usb-dashboard/marco-teorico.md): tablas, registros, consultas y funcionamiento de la página.
