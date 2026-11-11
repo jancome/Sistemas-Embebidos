@@ -1,5 +1,7 @@
 # Fundamentos de adquisición, SQLite y dashboard
 
+Los términos enlazados, como [JSON](glosario.md#json) o [transacción](glosario.md#transaccion), abren una explicación con ejemplos. La [lectura ampliada de bases de datos](bases-de-datos.md) desarrolla los argumentos de elección y las consultas SQL.
+
 ## Del sensor a la información
 
 Un sensor produce una lectura de una magnitud física. Por ejemplo, un DHT22 mide temperatura ambiente y humedad relativa. El ESP32 consulta esa lectura y la transmite. La Raspberry recibe el mensaje, comprueba sus datos, los guarda y permite consultarlos.
@@ -11,8 +13,8 @@ Cada parte responde una pregunta:
 | Sensor | ¿Qué valor tiene la magnitud física? |
 | ESP32 | ¿Cómo obtengo la lectura y la envío? |
 | Receptor Python | ¿El mensaje llegó y puede utilizarse? |
-| Base de datos | ¿Cómo conservo y consulto las lecturas? |
-| Dashboard | ¿Cómo interpreto lo que ocurre y lo que ocurrió? |
+| [Base de datos](glosario.md#base-de-datos) | ¿Cómo conservo y consulto las lecturas? |
+| [Dashboard](glosario.md#dashboard) | ¿Cómo interpreto lo que ocurre y lo que ocurrió? |
 
 Ver un número en pantalla no demuestra que se haya guardado. Tener un archivo de datos tampoco significa que exista una interfaz para interpretarlo. La integración conecta esas funciones.
 
@@ -46,13 +48,27 @@ Un mensaje de ejemplo:
 }
 ~~~
 
-Estos valores son ilustrativos. JSON organiza pares de nombre y valor: valor es numérico, unidad indica cómo interpretarlo y nodo identifica el origen. USB es el medio de transporte. Un salto de línea separa cada mensaje.
+Estos valores son ilustrativos. [JSON](glosario.md#json) organiza pares de nombre y valor: valor es numérico, unidad indica cómo interpretarlo y [nodo](glosario.md#nodo) identifica el origen. USB es el medio de transporte. Un salto de línea separa cada [trama](glosario.md#puerto-serial).
 
-Raspberry añade la fecha de recepción. No equivale necesariamente a la hora exacta en que el sensor midió. La secuencia cuenta intentos desde el arranque del firmware; puede volver a comenzar si se reinicia el ESP32.
+Raspberry añade una [marca de tiempo en UTC](glosario.md#fecha-utc) al recibir. No equivale necesariamente a la hora exacta en que el sensor midió. La secuencia cuenta intentos desde el arranque del [firmware](glosario.md#firmware); puede volver a comenzar si se reinicia el ESP32.
+
+Por ejemplo, "valor": 25.4 comunica un número, mientras que "valor": "25.4" comunica texto. Ambos pueden formar parte de un JSON correcto, pero el segundo incumple el formato de medición que espera el receptor. Entender el formato y [validar el significado](glosario.md#validacion) son comprobaciones distintas.
 
 ## Qué es una base de datos
 
 Es una forma organizada de conservar información y recuperarla mediante consultas. En una base relacional los datos se distribuyen en tablas.
+
+La necesitamos porque la lectura visible ahora no cuenta por sí sola lo que pasó antes. Si el dashboard muestra 25 °C, todavía no sabemos si hace un minuto hubo 30 °C, qué nodo lo midió o si dejó de transmitir. Guardar cada lectura con su origen, unidad y hora permite investigar esas preguntas.
+
+Una base aporta tres capacidades al proyecto:
+
+| Necesidad | Qué se conserva o consulta | Qué permite justificar |
+|---|---|---|
+| Revisar un comportamiento | Varias lecturas con fecha y origen | Cómo cambió una variable en el periodo observado |
+| Comprobar una regla | Valor, estado y umbral aplicado | Qué lecturas se clasificaron como ALERTA |
+| Investigar un fallo | Última lectura y eventos de comunicación | Qué se recibió antes de la interrupción y cuándo se reanudó |
+
+Estos argumentos explican por qué el proyecto incluye almacenamiento: una captura de pantalla conserva una vista; una base permite volver a consultar los registros.
 
 Para imaginar una tabla, puede pensarse en una hoja con filas y columnas:
 
@@ -63,17 +79,17 @@ Para imaginar una tabla, puede pensarse en una hoja con filas y columnas:
 
 Ejemplo ilustrativo:
 
-- **Tabla:** conjunto de registros sobre un tema; aquí, mediciones.
+- **[Tabla](glosario.md#tabla):** conjunto de registros sobre un tema; aquí, mediciones.
 - **Fila o registro:** una medición recibida.
 - **Columna o campo:** una característica de esa fila, como valor o unidad.
-- **Clave primaria:** identificador de una fila; aquí, id.
-- **Tipo de dato:** indica la clase de información, por ejemplo entero, real o texto.
+- **[Clave primaria](glosario.md#clave-primaria):** identificador de una fila; aquí, id.
+- **[Tipo de dato](glosario.md#tipos):** indica la clase de información, por ejemplo entero, real o texto.
 
 El id de la base no es la secuencia del ESP32. La Raspberry puede seguir asignando nuevos id aunque se reinicie la secuencia del emisor.
 
 ## Qué es SQLite
 
-SQLite es un motor de base de datos que la aplicación utiliza directamente. En esta práctica guarda las tablas en el archivo **mediciones.sqlite3**, dentro de la carpeta del programa.
+[SQLite](glosario.md#sqlite) es un motor de base de datos que la aplicación utiliza directamente. En esta práctica guarda las tablas en el archivo **mediciones.sqlite3**, dentro de la carpeta del programa.
 
 No hace falta instalar un servidor de base de datos ni crear un usuario de MySQL. Python accede mediante sqlite3, incluido habitualmente en Raspberry Pi OS.
 
@@ -83,18 +99,42 @@ El archivo no es un CSV ni un documento para abrir y editar como texto. Se consu
 
 | Nombre | Significado en esta práctica |
 |---|---|
-| SQL | Lenguaje para definir, guardar y consultar datos |
-| SQLite | Motor que administra la base local |
+| [SQL](glosario.md#sql) | Lenguaje para definir, guardar y consultar datos |
+| [SQLite](glosario.md#sqlite) | Motor que administra la base local |
 | sqlite3 | Módulo con el que Python utiliza SQLite |
-| MySQL | Otro motor, normalmente con servidor y administración propios |
+| [MySQL](glosario.md#mysql) | Otro motor, normalmente con servidor y administración propios |
 
 SQL no es un programa que debamos abrir. Es el lenguaje de las instrucciones que enviamos a la base. SQLite y MySQL utilizan SQL con diferencias entre sus funciones y dialectos.
 
 ### Por qué lo utilizamos aquí
 
-El proyecto tiene un receptor local y necesita un histórico que pueda consultar. SQLite evita añadir la instalación y administración de otro servicio. Permite recuperar las últimas lecturas, contar registros y calcular resúmenes.
+La elección parte de los requisitos: el receptor y la página se ejecutan en una Raspberry, existe un proceso principal de adquisición y necesitamos consultar su histórico. SQLite resuelve ese almacenamiento sin añadir la instalación y administración de otro servidor.
 
-No es una solución universal. Sistemas con muchos escritores simultáneos, datos centralizados entre equipos o necesidades específicas de acceso pueden requerir un motor cliente/servidor. Esta decisión depende de la arquitectura, no de que un motor sea siempre superior.
+| Característica | Ventaja concreta en el montaje |
+|---|---|
+| Acceso mediante sqlite3 | Python puede guardar y consultar desde la misma aplicación |
+| Archivo local | El histórico queda junto al programa y se identifica su ubicación |
+| Tablas y SQL | Se pueden filtrar nodos, ordenar lecturas y calcular resúmenes |
+| Transacciones | Cada escritura puede confirmarse como una operación coherente |
+| Lectura durante la operación | La página puede consultar mientras el receptor sigue adquiriendo |
+
+Un archivo local también requiere espacio, permisos y copias de respaldo. SQLite coordina una escritura a la vez; si el sistema exige muchas escrituras simultáneas o administración centralizada entre equipos, conviene evaluar otra arquitectura. [Criterios oficiales de uso de SQLite](https://www.sqlite.org/whentouse.html).
+
+### Qué cambiaría con MySQL
+
+MySQL normalmente añade un servicio de base de datos al que se conecta la aplicación. Ese servicio puede estar en Raspberry o en otro equipo. La página sigue necesitando una aplicación que reciba las peticiones y consulte los datos.
+
+| Aspecto | SQLite en esta práctica | MySQL en una arquitectura con servidor |
+|---|---|---|
+| Acceso | Python abre la base local | Python se conecta al servicio de base de datos |
+| Configuración | Archivo y permisos del sistema | Servicio, dirección, usuario, contraseña y permisos de base |
+| Uso desde varios equipos | Habitualmente a través de la aplicación web | Puede centralizar conexiones de aplicaciones autorizadas |
+| Escrituras concurrentes | Un escritor a la vez | Puede atender escrituras concurrentes según el motor y los bloqueos |
+| Lenguaje | SQL con funciones de SQLite | SQL con funciones y diferencias propias de MySQL |
+
+Tener varios navegadores abiertos no obliga por sí solo a cambiar a MySQL: esos navegadores consultan Flask y Flask consulta SQLite. Tampoco es necesario tener internet para utilizar MySQL en una red local. La decisión depende de dónde están los datos, quién escribe y cómo se administran los accesos.
+
+Por ejemplo, un monitor local instalado junto a una máquina puede usar SQLite. Si varias estaciones independientes deben escribir en un repositorio compartido con permisos por aplicación, MySQL puede ser una alternativa a evaluar. [Comparación desarrollada con esquemas y ejemplos](bases-de-datos.md#sqlite-y-mysql).
 
 ## Qué ocurre al guardar una medición
 
@@ -105,7 +145,7 @@ No es una solución universal. Sistemas con muchos escritores simultáneos, dato
 5. Confirma la transacción.
 6. El registro queda disponible para una consulta.
 
-Una **transacción** agrupa una operación que debe confirmarse o revertirse. Confirmar se conoce como commit. SQLite ayuda a mantener la consistencia de la base; no recupera mensajes que nunca llegaron ni elimina la necesidad de cuidar el almacenamiento.
+Una [transacción](glosario.md#transaccion) agrupa cambios que deben confirmarse o revertirse. Confirmar se conoce como commit. Esto permite distinguir «intenté guardar» de «la escritura se confirmó». SQLite ayuda a mantener la consistencia de la base; no recupera mensajes que nunca llegaron ni elimina la necesidad de cuidar el almacenamiento.
 
 En Python:
 
@@ -117,7 +157,7 @@ db.execute(
 db.commit()
 ~~~
 
-Este fragmento supone que existen la conexión db y la tabla ejemplo. Los signos ? son espacios para parámetros, no valores que deban pegarse manualmente dentro de la instrucción SQL.
+Este fragmento supone que existen la conexión db y la tabla ejemplo. Los signos ? son posiciones para [parámetros](glosario.md#parametros): se entrega el valor aparte de la instrucción SQL. Son importantes al utilizar datos que llegan de un dispositivo o de una entrada del usuario.
 
 ## Cómo aprendemos las instrucciones básicas
 
@@ -145,6 +185,46 @@ SELECT COUNT(*) FROM mediciones;
 ~~~
 
 COUNT(*) cuenta filas; no suma temperaturas.
+
+### Ejemplos: pasar de una pregunta a una consulta
+
+Estas instrucciones se ejecutan desde Python o una herramienta SQLite, no directamente como comandos de la terminal Linux. El [capítulo de bases de datos](bases-de-datos.md) explica cómo probarlas y seguir cada resultado.
+
+**¿Cuántas lecturas de temperatura en Celsius se guardaron?**
+
+~~~sql
+SELECT COUNT(*) AS cantidad
+FROM mediciones
+WHERE variable = 'temperatura' AND unidad = 'C';
+~~~
+
+WHERE selecciona la magnitud y la unidad. COUNT(*) cuenta las filas seleccionadas. AS da un nombre al resultado. Si solo existieran las dos filas de la tabla ilustrativa anterior, cantidad sería 2.
+
+**¿Cuál fue el promedio y cuáles fueron los extremos?**
+
+~~~sql
+SELECT MIN(valor) AS minimo,
+       ROUND(AVG(valor), 2) AS promedio,
+       MAX(valor) AS maximo
+FROM mediciones
+WHERE variable = 'temperatura' AND unidad = 'C';
+~~~
+
+Con 25.4 y 25.6, el mínimo sería 25.4, el promedio 25.5 y el máximo 25.6. ROUND muestra el promedio con hasta dos decimales. Estas operaciones resumen los registros seleccionados; no certifican la precisión del sensor ni describen los periodos sin datos. [Agregaciones y agrupación](glosario.md#agregacion).
+
+**¿Qué lecturas quedaron clasificadas como ALERTA?**
+
+~~~sql
+SELECT fecha_hora, nodo, valor, unidad, umbral
+FROM mediciones
+WHERE estado = 'ALERTA'
+ORDER BY id DESC
+LIMIT 5;
+~~~
+
+La consulta recupera la clasificación guardada en su momento. Si todas se recibieron con umbral null, puede no haber alertas. Eso no significa que la consulta esté fallando.
+
+El [capítulo ampliado](bases-de-datos.md) añade ejemplos por nodo, periodos de tiempo, parámetros, NULL y relación con los elementos del dashboard.
 
 ## Un ejemplo que se puede ejecutar sin sensor
 
@@ -175,11 +255,11 @@ El receptor admite campos adicionales para otros sensores. No son necesarios par
 
 Guarda situaciones de operación, como una trama rechazada o un error reportado por el sensor. Un mensaje inválido no se transforma en una medición de cero.
 
-**NULL** representa ausencia de un valor. No significa cero ni una cadena vacía. Si no hay umbral, la base puede conservar NULL en ese campo.
+**[NULL](glosario.md#null)** representa ausencia de un valor. No significa cero ni una cadena vacía. Si no hay umbral, la base puede conservar NULL en ese campo.
 
 ## Del CSV a SQLite
 
-CSV es un archivo de texto tabular útil para intercambio y análisis sencillo. SQLite permite mantener tablas y realizar consultas sin reescribir el archivo completo desde nuestro programa.
+[CSV](glosario.md#csv) es un archivo de texto tabular útil para intercambio y análisis sencillo. SQLite permite mantener tablas y realizar consultas sin reescribir el archivo completo desde nuestro programa.
 
 En la práctica anterior el programa producía un CSV. Ahora guarda en SQLite y ofrece una descarga CSV del histórico cuando se necesita. El archivo exportado es una copia para consultar o entregar; no reemplaza la base activa.
 
@@ -204,8 +284,8 @@ El dashboard no mide por sí mismo. Presenta información que el sistema ya reci
 
 Hay tres partes:
 
-1. **Flask:** programa Python que atiende peticiones del navegador.
-2. **HTML y JavaScript:** página que organiza los elementos y solicita actualizaciones.
+1. **[Flask](glosario.md#flask):** herramienta Python que atiende peticiones del navegador.
+2. **[HTML y JavaScript](glosario.md#html-javascript):** página que organiza los elementos y solicita actualizaciones.
 3. **Consulta a SQLite:** recupera el histórico que será presentado.
 
 Flask no es la base de datos. El navegador no abre directamente mediciones.sqlite3.
@@ -254,7 +334,9 @@ Flask devuelve un resumen JSON
 La página actualiza indicadores, gráfica y tabla
 ~~~
 
-La dirección **/api/estado** es una ruta de la aplicación que devuelve ese resumen. Una API es una forma definida de solicitar e intercambiar datos entre programas. En esta práctica puede verse como la “ventanilla” a la que la página pide información.
+La dirección **/api/estado** es una [ruta de la API](glosario.md#api) que devuelve ese resumen. Una API es una forma definida de solicitar e intercambiar datos entre programas. En esta práctica puede verse como la “ventanilla” a la que la página pide información.
+
+Una tarjeta con la última lectura, una gráfica y una tabla pueden utilizar distintas consultas sobre la misma base. El panel no necesita guardar tres copias de la medición: cambia la selección, el orden o el resumen que solicita. [Ejemplos de consultas para el dashboard](bases-de-datos.md#base-y-dashboard).
 
 ## Dónde corre cada parte
 
@@ -263,13 +345,13 @@ La dirección **/api/estado** es una ruta de la aplicación que devuelve ese res
 - El navegador de Raspberry muestra la página.
 - El Mac o PC puede controlar ese escritorio mediante Connect.
 
-**127.0.0.1** significa “este mismo computador”. **5000** identifica el puerto utilizado por la aplicación web. Por eso se abre http://127.0.0.1:5000 en el navegador de Raspberry. Escribirlo en el Mac consulta al Mac.
+**[127.0.0.1 y el puerto web](glosario.md#localhost):** la dirección significa “este mismo computador” y 5000 identifica la aplicación web. Por eso se abre http://127.0.0.1:5000 en el navegador de Raspberry. Escribirlo en el Mac consulta al Mac.
 
 Connect permite acceder al escritorio, pero no sustituye al receptor ni a la base de datos.
 
 ## Frecuencia de lectura y frecuencia de pantalla
 
-ESP32 consulta el DHT22 cada tres segundos. La página consulta el estado cada dos. Son tareas distintas: actualizar la página no obliga al sensor a producir otra lectura.
+El [intervalo de muestreo](glosario.md#muestreo) del ESP32 es de tres segundos. La página consulta el estado cada dos. Son tareas distintas: actualizar la página no obliga al sensor a producir otra lectura.
 
 No se espera que cada actualización de pantalla agregue una fila. La cantidad de filas crece cuando se recibe una medición válida. El DHT22 no responde instantáneamente a cambios ambientales.
 
@@ -297,7 +379,7 @@ No se reconstruyen automáticamente las lecturas perdidas durante una desconexi�
 
 ## Servicio y logs
 
-Un **servicio** es una aplicación administrada por el sistema para poder iniciarla y supervisarla. systemd permite configurarlo en Linux. Guardar app.py no hace que arranque automáticamente.
+Un **[servicio](glosario.md#servicio-logs)** es una aplicación administrada por el sistema para poder iniciarla y supervisarla. systemd permite configurarlo en Linux. Guardar app.py no hace que arranque automáticamente.
 
 Los **logs** son mensajes sobre la operación del programa: conexión, rechazo o error. El histórico de mediciones registra la variable física. Cumplen funciones distintas, aunque ambos ayudan a explicar lo ocurrido.
 
@@ -311,8 +393,12 @@ Los valores concretos del informe deben venir de los archivos y pruebas del grup
 
 ## Referencias
 
+- [Bases de datos: argumentos y consultas explicadas](bases-de-datos.md).
+- [Glosario de términos](glosario.md).
 - [SQLite: usos apropiados](https://www.sqlite.org/whentouse.html).
 - [Python sqlite3](https://docs.python.org/3/library/sqlite3.html).
+- [MySQL: qué es y cómo funciona](https://dev.mysql.com/doc/refman/8.4/en/what-is-mysql.html).
 - [Flask: aplicación y rutas](https://flask.palletsprojects.com/en/stable/quickstart/).
 - [DHT22](https://learn.adafruit.com/dht/overview).
 - [Guía de la práctica](README.md).
+
