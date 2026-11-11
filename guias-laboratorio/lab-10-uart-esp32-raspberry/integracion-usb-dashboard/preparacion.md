@@ -19,7 +19,7 @@ La Raspberry es un computador independiente. El Mac no se convierte en su monito
 3. En Imager, selecciona tu modelo y **Raspberry Pi OS de 64 bits con escritorio**. La variante Lite no incluye el escritorio que utilizamos en esta práctica.
 4. Selecciona la microSD como destino. La escritura borra su contenido: comprueba que sea la tarjeta elegida.
 5. En la personalización, guarda el nombre del equipo, usuario, contraseña, zona horaria y datos exactos de Wi-Fi. Configura el país correspondiente a la red.
-6. Activa SSH si necesitas hacer el primer acceso sin monitor. Puedes habilitar Connect si Imager ofrece esa opción; se puede activar también después.
+6. Activa SSH si necesitas hacer el primer acceso sin monitor. Para seguir el ejemplo de esta página, elige autenticación por contraseña: utilizarás el usuario y la contraseña Linux que acabas de configurar. Puedes habilitar Connect si Imager ofrece esa opción; se puede activar también después.
 7. Escribe la imagen y espera a que termine la verificación. Si falla, revisa tarjeta y lector antes de utilizarla.
 8. Expulsa la tarjeta desde el computador, colócala en Raspberry y conecta su fuente.
 
