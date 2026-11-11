@@ -22,4 +22,6 @@ Esquema de base, registros, dashboard, archivo de servicio, estado del servicio,
 
 ## Implementación guiada
 
-[Práctica compacta de integración USB y dashboard](../lab-10-uart-esp32-raspberry/integracion-usb-dashboard/README.md): receptor Python, SQLite, interfaz local, generador de servicio y evidencias. Consultar los límites de la verificación y ensayar con el hardware real antes de la clase.
+[Guía de integración USB, SQLite y dashboard](../lab-10-uart-esp32-raspberry/integracion-usb-dashboard/README.md): receptor Python, SQLite, interfaz local, generador de servicio y evidencias. Incluye pasos explicados, ejemplos ejecutables y resultados esperados. El montaje debe comprobarse con el hardware real.
+
+[Marco teórico de SQLite y dashboard](../lab-10-uart-esp32-raspberry/integracion-usb-dashboard/marco-teorico.md): conceptos, ejemplos de consultas y recorrido de los datos hasta la página.
