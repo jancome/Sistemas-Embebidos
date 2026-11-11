@@ -358,6 +358,8 @@ python app.py
 
 La aplicación abre el puerto, espera mensajes, valida, guarda registros y atiende la página. Dejar esa terminal abierta.
 
+Mientras funciona, esa terminal muestra mensajes y no espera otro comando: no se quedó bloqueada. Para consultar archivos sin detener el receptor abriremos una segunda terminal. Si aparece una advertencia de Flask sobre servidor de desarrollo, identifica que esta ejecución es la prueba local del laboratorio; no significa que haya fallado la lectura.
+
 Abrir el navegador **de la Raspberry** y escribir:
 
 ~~~text
