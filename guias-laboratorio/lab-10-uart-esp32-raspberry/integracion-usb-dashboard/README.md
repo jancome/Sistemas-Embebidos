@@ -1,127 +1,269 @@
-# Práctica integradora: sensor → ESP32 → Raspberry → SQLite → dashboard
+# Lectura de sensores con ESP32 y Raspberry Pi
 
-Para sesiones de **3 horas** y cierre del curso antes del **27 de noviembre de 2026**. Complementa los laboratorios 10 y 11.
-
-**Sensor de referencia recomendado:** DHT22 en módulo de tres pines, con resistencia pull-up integrada y operación confirmada a 3,3 V. Debe conseguirse y probarse antes de la clase. Las evidencias serán mediciones reales; no se completan lecturas faltantes con valores simulados.
-
-## Resultado de la práctica
+En esta práctica construiremos un monitor de temperatura y humedad. El ESP32 toma la lectura del sensor, la envía por USB y la Raspberry la guarda y la presenta en una página.
 
 ~~~text
-Módulo DHT22 → ESP32-S3 → USB de datos → Raspberry Pi
-                                      ├─ Python: recibir y validar
-                                      ├─ SQLite: conservar registros
-                                      └─ Flask: dashboard en el navegador
+Sensor DHT22 → ESP32 → USB → Programa Python → SQLite → Dashboard
 ~~~
 
-**SQL es el lenguaje; SQLite y MySQL son gestores distintos.** SQLite guarda la base en un archivo y no necesita administrar un servidor de base de datos separado. sqlite3 viene en la instalación habitual de Python de Raspberry Pi OS. Flask sirve la página y pySerial recibe por USB.
+Al finalizar debemos poder seguir una misma lectura desde el mensaje del ESP32 hasta la fila de la base de datos y el valor mostrado en pantalla.
 
-La página se abre en el navegador de la Raspberry, incluso si se ve su escritorio por Connect. No hay que configurar Wi-Fi en ESP32 ni abrir puertos del router.
+## Los conceptos que vamos a utilizar
 
-## Organización hasta el cierre
-
-| Sesión | Trabajo y evidencia |
+| Concepto | Significado |
 |---|---|
-| 11 de noviembre | Sensor, mensaje USB, recepción, SQLite y dashboard |
-| 18 de noviembre | Adaptación al proyecto, tramas inválidas, desconexión/reconexión, servicio y logs |
-| 25 de noviembre | Demostración, consulta de históricos y sustentación |
-| Hasta el 27 de noviembre | Margen de cierre que indique el docente; no supone clases adicionales |
+| Sensor | Dispositivo que obtiene una lectura de una magnitud física |
+| Firmware | Programa cargado en el ESP32 |
+| Puerto serial | Canal por el que intercambiamos mensajes con la placa |
+| JSON | Forma de organizar los campos de un mensaje |
+| SQLite | Motor que guarda y consulta los registros en un archivo local |
+| SQL | Lenguaje de las instrucciones que enviamos a la base de datos |
+| Flask | Herramienta Python que atiende las peticiones de la página |
+| Dashboard | Panel con valores, estados, gráfica y registros |
 
-El repositorio sitúa la muestra final el 25. Esta propuesta no cambia esa fecha ni los pesos de evaluación.
+**SQLite guarda; el dashboard presenta.** Cerrar la página no borra el histórico. El programa receptor debe seguir funcionando para recibir nuevas lecturas.
 
-## Preparación antes de clase
+Antes de empezar, leer el [marco teórico de SQLite y dashboard](marco-teorico.md). Incluye ejemplos de tablas, consultas y estados.
 
-- Raspberry actualizada, Python 3 y acceso al escritorio.
-- ESP32-S3 y cable USB **de datos**; identificar qué conector utiliza la placa.
-- Módulo DHT22 de tres pines con pull-up integrado, probado con alimentación y señal de 3,3 V.
-- Cables; montaje con alimentación desconectada.
-- Arduino IDE con soporte de placa y bibliotecas **DHT sensor library by Adafruit** y **Adafruit Unified Sensor** instaladas.
-- Carpeta de esta práctica descargada en Raspberry.
+## Dónde haremos cada cosa
 
-N16R8 identifica memoria del módulo, no el pinout completo. Verificar la placa concreta. Esta práctica no necesita utilizar PSRAM.
+| Acción | Equipo o aplicación |
+|---|---|
+| Editar y cargar el firmware | Arduino IDE en el computador |
+| Conectar el sensor | Pines del ESP32, con alimentación desconectada |
+| Preparar y ejecutar Python | Terminal de la Raspberry |
+| Guardar la base de datos | Carpeta del programa en la Raspberry |
+| Abrir el dashboard | Navegador dentro del escritorio de la Raspberry |
+| Controlar ese escritorio desde el Mac | Raspberry Pi Connect |
 
-## Archivos
+La terminal del Mac y la terminal del escritorio de Raspberry pertenecen a equipos distintos. En las instrucciones se indica cuál utilizar.
+
+## Materiales
+
+- Raspberry Pi con Raspberry Pi OS, fuente, refrigeración y acceso al escritorio.
+- ESP32-S3 y cable USB que permita **datos**, no solo carga.
+- DHT22 en **módulo de tres pines**, con pull-up integrado y funcionamiento confirmado a 3,3 V.
+- Cables para conectar el módulo al ESP32.
+- Arduino IDE y los archivos de la práctica.
+
+El DHT22 mide temperatura ambiente y humedad. No mide la temperatura interna del procesador de Raspberry.
+
+Un sensor suelto de cuatro pines puede requerir una resistencia externa. Revisar las etiquetas del módulo; el orden de sus conexiones varía. N16R8 identifica memoria del módulo ESP32, no el nombre completo ni el pinout de la placa.
+
+## 1. Descargar los archivos
+
+En el navegador abrir [Sistemas-Embebidos](https://github.com/jancome/Sistemas-Embebidos), pulsar **Code → Download ZIP** y descomprimir.
+
+Dentro de la carpeta descargada buscar:
 
 ~~~text
-integracion-usb-dashboard/
+guias-laboratorio/
+  lab-10-uart-esp32-raspberry/
+    integracion-usb-dashboard/
+~~~
+
+Se necesita una copia en el computador para cargar el firmware y otra en Raspberry para ejecutar el receptor.
+
+En el explorador de archivos de Raspberry, copiar la carpeta integracion-usb-dashboard a la carpeta personal y renombrarla **monitor_esp32**. Así utilizaremos una ruta sencilla:
+
+~~~text
+/home/tu_usuario/monitor_esp32
+~~~
+
+En tu equipo el usuario puede ser diferente. El símbolo ~ en la terminal representa la carpeta personal y evita tener que escribir ese nombre.
+
+La carpeta debe contener:
+
+~~~text
+monitor_esp32/
   app.py
   config.json
   requirements.txt
+  ejemplo_sqlite.py
+  consultar_datos.py
   generar_servicio.py
-  templates/dashboard.html
-  esp32_dht22/esp32_dht22.ino
-  mediciones.sqlite3           # Lo crea la aplicación
+  templates/
+    dashboard.html
+  esp32_dht22/
+    esp32_dht22.ino
 ~~~
 
-Descargar el repositorio mediante **Code → Download ZIP**, descomprimir y abrir esta carpeta, o utilizar su copia local. Mantener templates/dashboard.html junto a app.py.
+No separar dashboard.html de la carpeta templates: el servidor utiliza esa ubicación.
 
-## Clase de tres horas
+## 2. Preparar Arduino IDE en el computador
 
-| Bloque | Actividad |
-|---|---|
-| 20 min | Explicar adquisición, mensaje, validación, persistencia y consulta |
-| 25 min | Sensor y lectura del ESP32 |
-| 20 min | Observar una trama JSON por línea |
-| 30 min | Receptor y comprobación de SQLite |
-| 30 min | Dashboard e histórico |
-| 35 min | Pruebas de comunicación y recuperación |
-| 20 min | Evidencia y adaptación al proyecto |
+Si la placa ya puede programarse, conservar su configuración y comprobar las bibliotecas del sensor.
 
-La base del dashboard se entrega preparada. No se dedica la clase a programar HTML desde cero. Cada integrante debe explicar cómo un dato llega desde el sensor hasta la consulta.
+Para una instalación inicial:
 
-## 1. Montar el DHT22
+1. Instalar [Arduino IDE](https://www.arduino.cc/en/software).
+2. Abrir **Preferencias** y localizar **Gestor de URLs adicionales de tarjetas**.
+3. Añadir la dirección estable del soporte ESP32:
 
-Con alimentación desconectada, seguir **las etiquetas del módulo**, no una posición supuesta:
+   ~~~text
+   https://espressif.github.io/arduino-esp32/package_esp32_index.json
+   ~~~
 
-| Módulo DHT22 | ESP32-S3 |
-|---|---|
-| VCC / + | 3V3 |
-| GND / − | GND |
-| DATA / S | GPIO4, si está expuesto y libre en el pinout de la placa |
+4. Abrir **Gestor de placas**, buscar esp32 e instalar el paquete de **Espressif Systems**.
+5. Seleccionar la placa correspondiente. En algunas placas genéricas aparece ESP32S3 Dev Module; comprobar el modelo y las opciones del fabricante.
+6. En **Gestor de bibliotecas**, buscar e instalar **DHT sensor library by Adafruit**. Instalar también **Adafruit Unified Sensor** si el gestor no la incorpora como dependencia.
 
-El sensor se conecta al ESP32, no a los GPIO de Raspberry. El sensor suelto de cuatro pines puede necesitar pull-up externo; el módulo elegido debe incluirlo y funcionar a 3,3 V. Si cambia GPIO, modificar PIN_DHT.
+Estas bibliotecas van en Arduino IDE. No se instalan con pip: pip se utilizará después para las dependencias de Python en Raspberry.
 
-## 2. Programar y observar el ESP32
+La identificación de la placa, las descargas y la carga del firmware deben comprobarse antes de montar el sistema completo.
 
-Abrir [esp32_dht22.ino](esp32_dht22/esp32_dht22.ino), seleccionar placa/puerto y cargar. Lee cada **3 segundos**. No consultar DHT22 más rápido que su intervalo admitido.
+## 3. Conectar el módulo DHT22 al ESP32
 
-Con USB nativo puede ser necesario **USB CDC On Boot → Enabled** para que Serial salga por ese conector. Con puente USB-UART, Serial y la selección CDC deben corresponder al puente. Usar el mismo conector funcional al pasar a Raspberry; consultar el manual de la placa.
+Desconectar la alimentación antes de cablear. Seguir las etiquetas:
 
-Monitor serial a **115200 baudios**. Ejemplo ilustrativo:
+| DHT22 | ESP32-S3 | Función |
+|---|---|---|
+| VCC / + | 3V3 | Alimentación |
+| GND / − | GND | Referencia eléctrica común |
+| DATA / S | GPIO4, si está expuesto y libre en la placa | Lectura digital |
+
+GPIO4 es el identificador del ESP32, no el cuarto pin del conector de Raspberry. Si se utiliza otro GPIO disponible, cambiar PIN_DHT en el firmware.
+
+En este montaje el sensor se alimenta a 3,3 V y su módulo debe ser compatible con ese voltaje. No conectar una señal de 5 V directamente al ESP32. El YF-S201 necesita un montaje de adaptación distinto y no se sustituye directamente por este módulo.
+
+**Resultado que comprobar:** conexiones según etiquetas, alimentación adecuada y pin de datos coincidente con el código.
+
+## 4. Cargar el firmware y observar el mensaje
+
+1. Conectar el ESP32 al computador mediante el USB de datos.
+2. Abrir [esp32_dht22.ino](esp32_dht22/esp32_dht22.ino).
+3. Seleccionar placa y puerto en Arduino IDE.
+4. Cargar el programa y esperar el mensaje de carga terminada.
+5. Abrir **Monitor serial** y seleccionar **115200 baudios**.
+
+Baudios es la velocidad configurada para la comunicación serial. El emisor y el receptor deben usar la misma.
+
+Si la placa utiliza USB nativo, puede requerir **USB CDC On Boot → Enabled** para que Serial salga por ese conector. Si usa un puente USB-UART, la configuración debe corresponder a ese puente. Consultar el manual de la placa y utilizar después el mismo conector que funcionó.
+
+El programa consulta el DHT22 cada tres segundos. Debe aparecer un mensaje por línea, por ejemplo:
 
 ~~~json
 {"nodo":"esp32-01","variable":"temperatura","valor":25.4,"unidad":"C","secuencia":1,"estado":"OK","humedad_pct":61.2}
 ~~~
 
-Cerrar el monitor antes de abrir el receptor: un puerto no debe ser usado por dos aplicaciones.
+Los números anteriores son ilustrativos; el monitor debe mostrar las lecturas de tu sensor.
 
-**Explicación:** JSON organiza campos, USB transporta. valor es numérico; unidad le da significado; secuencia ayuda a observar continuidad/reinicios. Raspberry agrega la hora de recepción. Si el sensor falla, ESP32 envía ERROR con valor null, no una temperatura ficticia de cero.
+| Campo | Cómo interpretarlo |
+|---|---|
+| nodo | Identifica al emisor |
+| variable | Indica qué representa valor |
+| valor | Lectura numérica |
+| unidad | C corresponde a grados Celsius |
+| secuencia | Contador del mensaje desde el arranque |
+| estado | OK si el firmware obtuvo lectura; ERROR si no pudo |
+| humedad_pct | Lectura complementaria de humedad relativa |
 
-## 3. Preparar Python y el puerto
+JSON permite organizar esos campos; USB lleva el mensaje. El salto de línea indica dónde termina.
 
-Conectar ESP32 por USB a Raspberry. No conectarlo simultáneamente a dos computadores. En una terminal **de la Raspberry**, entrar a la carpeta que contiene app.py y ejecutar cada línea:
+**Resultado que comprobar:** líneas legibles, secuencia que aumenta y valores reales. Si el sensor no responde, se envía ERROR y valor null; no se inventa una lectura de cero.
+
+Si hay ERROR, revisar alimentación, módulo/pull-up y coincidencia del GPIO. No continuar con Raspberry hasta tener identificada la lectura.
+
+Para reconocer las instrucciones del firmware:
+
+~~~cpp
+constexpr uint8_t PIN_DHT = 4;             // GPIO utilizado por DATA
+constexpr uint32_t INTERVALO_MS = 3000;    // Tres segundos entre lecturas
+DHT dht(PIN_DHT, DHT22);                   // Sensor que se va a consultar
+~~~
+
+En setup, Serial.begin(115200) prepara la comunicación y dht.begin() inicializa el sensor. setup se ejecuta una vez al arrancar. loop se repite: espera el intervalo, pide temperatura y humedad, comprueba si hubo fallo y envía el JSON. millis() informa el tiempo transcurrido desde el arranque; no es la fecha del calendario.
+
+Estas dos instrucciones obtienen los valores:
+
+~~~cpp
+const float temperatura = dht.readTemperature();  // Temperatura en Celsius
+const float humedad = dht.readHumidity();         // Humedad relativa en %
+~~~
+
+Son fragmentos del programa completo, no otro firmware que haya que cargar por separado. Primero se comprueba la lectura y después se estudia cómo se forma el mensaje con Serial.printf.
+
+Cerrar el Monitor serial. Desconectar el ESP32 del computador antes de pasarlo a la Raspberry.
+
+## 5. Abrir la carpeta en la terminal de Raspberry
+
+Conectar el ESP32 a un puerto USB de Raspberry. Si utilizas Connect, abre la terminal con el icono >_ **dentro de ese escritorio**.
+
+Ejecutar una línea y pulsar Enter antes de pasar a la siguiente:
+
+~~~bash
+cd ~/monitor_esp32
+pwd
+ls
+~~~
+
+- cd entra a la carpeta.
+- pwd muestra la ubicación actual.
+- ls muestra sus archivos.
+
+**Resultado que comprobar:** pwd termina en monitor_esp32 y ls incluye app.py, config.json y requirements.txt.
+
+Si aparece No such file or directory, revisar dónde se copió la carpeta y respetar mayúsculas. No seguir instalando desde una carpeta equivocada.
+
+## 6. Crear el entorno Python
+
+Desde esa carpeta:
 
 ~~~bash
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
+~~~
+
+| Instrucción | Qué hace |
+|---|---|
+| python3 -m venv .venv | Crea un entorno de Python para este proyecto |
+| source .venv/bin/activate | Hace que la terminal utilice ese entorno |
+| python -m pip install -r requirements.txt | Instala las dependencias indicadas en el archivo |
+
+El entorno evita mezclar las bibliotecas de la práctica con las del sistema. requirements.txt incluye Flask y pySerial.
+
+**Resultado que comprobar:** la instalación termina sin errores y la terminal suele mostrar (.venv) al inicio.
+
+Si Python indica que falta venv:
+
+~~~bash
+sudo apt install python3-venv
+~~~
+
+Después repetir la creación. En una terminal nueva hay que volver a entrar a la carpeta y activar .venv.
+
+Para esta aplicación se recomienda editar en Thonny o en un editor y **ejecutar desde la terminal con el entorno activo**. El botón Run de Thonny puede utilizar otro intérprete sin las dependencias instaladas.
+
+## 7. Identificar el puerto del ESP32
+
+~~~bash
 python -m serial.tools.list_ports -v
 ~~~
 
-Si falta venv, instalar python3-venv antes de clase. Si hay Permission denied, consultar:
+La instrucción lista los dispositivos seriales. Puede aparecer /dev/ttyACM0 o /dev/ttyUSB0; son ejemplos de nombres, no valores que deban asumirse en todos los equipos.
+
+**Resultado que comprobar:** aparece el dispositivo correspondiente al ESP32.
+
+Si no aparece, comprobar cable de datos y conector/configuración USB. No abrir el monitor de Arduino mientras el receptor utiliza ese puerto.
+
+Si aparece Permission denied:
 
 ~~~bash
 groups
 ~~~
 
-Si falta dialout, agregar al usuario propio y cerrar sesión o reiniciar cuando no haya actualización activa:
+Si falta dialout, agregar al usuario propio:
 
 ~~~bash
 sudo usermod -aG dialout "$USER"
 ~~~
 
-No ejecutar toda la aplicación con sudo ni cambiar permisos globales de /dev.
+Cerrar sesión y volver a entrar para actualizar los grupos; reiniciar ordenadamente es otra opción. No ejecutar toda la aplicación con sudo ni cambiar permisos globales del puerto.
 
-## 4. Revisar config.json
+## 8. Entender config.json
+
+Abrir config.json con un editor. Contiene:
 
 ~~~json
 {
@@ -136,126 +278,236 @@ No ejecutar toda la aplicación con sudo ni cambiar permisos globales de /dev.
 }
 ~~~
 
-- auto acepta un único puerto USB detectado. Con varios dispositivos o sin metadatos USB, escribir la ruta identificada con list_ports, por ejemplo /dev/ttyACM0 o /dev/ttyUSB0.
-- Puede usarse /dev/serial/by-id/… si existe esa identificación persistente.
-- min/max corresponden a la variable/sensor. No son un umbral de peligro.
-- umbral null desactiva la alerta. Para ensayarla, elegir un valor próximo a una lectura observada; no forzar calor. La regla es valor >= umbral.
-- sin_datos_s debe superar al intervalo de envío: 10 s para envíos cada 3 s.
-- Detener/iniciar la aplicación después de editar configuración.
+| Parámetro | Significado |
+|---|---|
+| puerto | auto busca un único USB; también acepta la ruta identificada en el paso anterior |
+| baudrate | Debe coincidir con Serial.begin del ESP32 |
+| variable y unidad | Deben coincidir exactamente con el mensaje |
+| minimo y maximo | Rango aceptado para esa variable y sensor |
+| umbral | Condición didáctica: si valor >= umbral se clasifica ALERTA |
+| sin_datos_s | Tiempo máximo antes de considerar que falta una lectura válida reciente |
 
-## 5. Ejecutar y ver el dashboard
+null significa que no hay umbral configurado; en ese caso no se aplica una condición de alerta. No es cero.
 
-Desde esa carpeta y con .venv activo:
+El rango -40 a 80 se utiliza para validar este ejemplo de temperatura DHT22; no significa que todos esos valores sean seguros para un proceso.
+
+Si hay varios USB, auto no elige uno al azar. Escribir la ruta identificada. Si existe una identificación persistente en /dev/serial/by-id, también puede utilizarse.
+
+Guardar después de editar. El archivo JSON usa comillas dobles y no admite comentarios con #.
+
+## 9. Ejecutar el receptor y abrir la página
+
+Con la terminal en monitor_esp32 y .venv activo:
 
 ~~~bash
 python app.py
 ~~~
 
-En el navegador **dentro del escritorio de Raspberry**:
+La aplicación abre el puerto, espera mensajes, valida, guarda registros y atiende la página. Dejar esa terminal abierta.
+
+Abrir el navegador **de la Raspberry** y escribir:
 
 ~~~text
 http://127.0.0.1:5000
 ~~~
 
-Esa dirección escrita en el navegador del Mac consultaría al Mac. El servidor escucha localmente; no se necesita publicarlo en Internet.
+127.0.0.1 significa el mismo equipo donde está abierto el navegador. Por eso, si estás usando Connect, la dirección se escribe dentro del navegador del escritorio remoto. En el navegador del Mac consultaría al Mac.
 
-Muestra temperatura, humedad, hora, estado, gráfica, últimos registros, contador y descarga CSV. La página consulta cada dos segundos; la adquisición sigue el intervalo del ESP32.
+**Resultado que comprobar:** se abre el dashboard. Al llegar mensajes válidos aparecen temperatura, humedad, hora y registros. La cantidad guardada debe aumentar.
 
-**Comprobar:** la secuencia y el número de filas aumentan. Observar cambios ambientales suaves y esperar la respuesta del sensor. Si falta el sensor pueden preparar software, pero no presentar simulaciones como adquisición física.
+La página se actualiza cada dos segundos y el sensor se consulta cada tres. Actualizar la página no obliga a obtener otra lectura. Los cambios del DHT22 pueden tardar en reflejarse.
 
-## 6. Consultar SQLite
+## 10. Aprender SQLite con un ejemplo separado
 
-app.py crea mediciones.sqlite3 junto al programa. Abrir otra terminal en la misma carpeta:
+Dejar la primera terminal con app.py funcionando. Abrir una **segunda terminal de Raspberry** y ejecutar:
 
 ~~~bash
-python3
+cd ~/monitor_esp32
+source .venv/bin/activate
+python ejemplo_sqlite.py
 ~~~
 
-En ese intérprete, una instrucción a la vez:
+Este ejemplo crea **ejemplo.sqlite3**, añade un dato ilustrativo y lo consulta. No escribe ese dato en mediciones.sqlite3.
 
-~~~python
-import sqlite3
-db = sqlite3.connect("mediciones.sqlite3")
-filas = db.execute("SELECT fecha_hora, valor, unidad, estado FROM mediciones ORDER BY id DESC LIMIT 5").fetchall()
-print(filas)
-cantidad = db.execute("SELECT COUNT(*) FROM mediciones").fetchone()[0]
-print("Mediciones guardadas:", cantidad)
-db.close()
-exit()
+Abrir [ejemplo_sqlite.py](ejemplo_sqlite.py) y seguir estas operaciones:
+
+| Parte del código | Función |
+|---|---|
+| sqlite3.connect | Abre o crea la base |
+| CREATE TABLE IF NOT EXISTS | Define la tabla si todavía no existe |
+| INSERT INTO | Añade una fila |
+| commit | Confirma la operación de escritura |
+| SELECT | Recupera filas |
+| fetchall | Obtiene los resultados de la consulta |
+
+**Resultado que comprobar:** aparece un identificador, una fecha y el valor ilustrativo. Ejecutar de nuevo añade otra fila; no es una nueva medición física.
+
+La explicación completa de tabla, fila, columna, SQL y transacción está en el [marco teórico](marco-teorico.md).
+
+## 11. Consultar los registros reales
+
+Mantener app.py ejecutándose en la primera terminal. En la segunda terminal utilizada en el paso anterior:
+
+~~~bash
+cd ~/monitor_esp32
+source .venv/bin/activate
+python consultar_datos.py
 ~~~
 
-SELECT consulta, ORDER BY id DESC empieza por las últimas filas y LIMIT 5 acota el resultado. Comparar una fila con el dashboard. La hora guardada es recepción en UTC; el navegador muestra la zona local.
+[consultar_datos.py](consultar_datos.py) muestra cantidad de mediciones, últimas filas y eventos. Comprueba que existe la base antes de abrirla para evitar crear por accidente un archivo vacío en otra carpeta.
 
-Una trama inválida o un fallo del sensor no insertan una medición ficticia. Los detalles quedan en la tabla eventos y los logs.
+La consulta principal es:
 
-## 7. Pruebas
+~~~sql
+SELECT id, fecha_hora, nodo, valor, unidad, estado, humedad_pct
+FROM mediciones
+ORDER BY id DESC
+LIMIT 5;
+~~~
 
-| Prueba | Acción | Evidencia |
-|---|---|---|
-| Adquisición | Sensor conectado y mensajes válidos | Lecturas reales y secuencia |
-| Persistencia | Consultar SQLite y recargar página | Filas anteriores conservadas |
-| Trama inválida | Activar PROBAR_TRAMA_INVALIDA en el sketch y volver a cargar | Segunda trama rechazada; contador/evento; luego recepción válida |
-| Pérdida USB | Desconectar USB ESP32–Raspberry | Último dato marcado como histórico; cambia estado; sin ceros inventados |
-| Reconexión | Volver a conectar USB de datos | Reintenta y guarda nuevas lecturas |
-| Arranque | Configurar servicio y reiniciar ordenadamente | Receptor iniciado y dashboard disponible |
+Se lee: “mostrar estos campos de la tabla mediciones, empezando por los id mayores y devolver como máximo cinco filas”.
 
-Para cargar firmware detener receptor y cerrar monitores. Identificar la prueba inducida y volver PROBAR_TRAMA_INVALIDA a false al terminar.
+**Resultado que comprobar:** una fila coincide con el valor, nodo y hora del dashboard. La base guarda UTC y la página convierte la hora a la zona del navegador.
 
-Los datos nunca recibidos no se recuperan automáticamente. La versión no implementa buffer/reenvío, deduplicación, autenticación de nodos ni control de actuadores. Abrir el puerto puede reiniciar ESP32 y su secuencia; el histórico de Raspberry permanece.
+mediciones.sqlite3 es un archivo de base de datos, no un texto para editar directamente. Los archivos con sufijos -wal y -shm que puedan aparecer son auxiliares de SQLite; no borrarlos mientras la aplicación funciona.
 
-## 8. Servicio y logs — segunda sesión
+## 12. Interpretar el dashboard
 
-Comprobar primero el funcionamiento manual. Detener app.py con Ctrl+C y ejecutar desde la carpeta:
+| Elemento | Qué responde |
+|---|---|
+| Valor y humedad | ¿Cuál fue la última medición guardada? |
+| Hora de recepción | ¿Cuándo llegó? |
+| Estado | ¿Hay datos recientes o una condición que atender? |
+| Gráfica | ¿Cómo cambió la variable en el histórico reciente? |
+| Tabla | ¿Cuáles son los últimos registros? |
+| Descargar CSV | ¿Cómo obtengo una copia tabular para analizar o entregar? |
+
+La página solicita información a /api/estado. Python consulta SQLite y devuelve un resumen; la página lo representa. El navegador no lee el archivo SQLite directamente.
+
+**Importante:** una lectura antigua visible no equivale a un sensor conectado ahora. Revisar hora y estado, no solo el número.
+
+## 13. Probar una trama incorrecta
+
+1. En la primera terminal, detener app.py con Ctrl+C. Si se utiliza como servicio, detenerlo con sudo systemctl stop monitor-esp32.
+2. Cerrar cualquier monitor serial.
+3. Pasar el ESP32 al computador y abrir el firmware.
+4. Cambiar la línea del indicador de prueba a:
+
+   ~~~cpp
+   constexpr bool PROBAR_TRAMA_INVALIDA = true;
+   ~~~
+
+5. Cargar el firmware, cerrar el monitor y volver a conectar ESP32 a Raspberry.
+6. Ejecutar otra vez el receptor. Si el indicador todavía está en false, este paso no provoca una trama incorrecta.
+7. Cuando el receptor ya esté abierto, pulsar una vez RESET en el ESP32 para repetir la secuencia de prueba. Esperar a que reabra el puerto si es necesario.
+
+En la segunda adquisición se envía un JSON sin los campos requeridos. La lectura no debe guardarse como una medición válida. El contador de rechazadas y la tabla eventos permiten comprobarlo. Las siguientes lecturas vuelven al recorrido normal.
+
+**Evidencia:** captura del contador y consulta del evento. Identificar que el fallo fue inducido. Restaurar false y volver a cargar al finalizar.
+
+La prueba no significa que el sensor se dañó ni que el mensaje fuera una medición real de cero.
+
+## 14. Probar desconexión y recuperación
+
+1. Mantener el dashboard y app.py abiertos.
+2. Desconectar solo el USB entre ESP32 y Raspberry.
+3. Esperar más de diez segundos, el plazo sin_datos_s de la configuración inicial, y otra actualización de pantalla.
+4. Observar el estado y el último registro.
+5. Conectar otra vez el cable de datos.
+6. Esperar que el receptor reintente y aparezcan filas nuevas.
+
+**Resultado esperado:** el dato anterior permanece como histórico; no se insertan ceros por falta de comunicación. La página indica que no hay datos recientes y vuelve a actualizarse al recibir lecturas válidas.
+
+Abrir el puerto puede reiniciar algunas placas. La secuencia del ESP32 puede comenzar de nuevo, pero el id de SQLite y las filas anteriores no se borran.
+
+No se reconstruyen mediciones que nunca llegaron. Para recuperarlas harían falta almacenamiento temporal y reenvío en el nodo, fuera del alcance de esta implementación.
+
+## 15. Configurar inicio automático
+
+Hacerlo después de comprobar la ejecución manual. Un servicio permite que Linux inicie la aplicación sin abrir una terminal después de cada reinicio.
+
+Detener app.py con Ctrl+C y, desde la carpeta y el entorno, ejecutar:
 
 ~~~bash
 python generar_servicio.py
+~~~
+
+El programa crea monitor-esp32.service usando el usuario y las rutas de ese equipo. Ejecutar el generador como usuario normal.
+
+Instalar el servicio:
+
+~~~bash
 sudo cp monitor-esp32.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now monitor-esp32
 systemctl status monitor-esp32 --no-pager
 ~~~
 
-El generador usa el usuario y rutas reales, sin asumir jancome. Ejecutarlo sin sudo; solo la instalación requiere sudo.
+| Instrucción | Función |
+|---|---|
+| cp | Copia la definición al directorio de servicios |
+| daemon-reload | Pide a systemd volver a leer las definiciones |
+| enable --now | Lo habilita para el arranque y lo inicia ahora |
+| status | Consulta si está funcionando |
+
+Buscar active (running) en el estado. Abrir el dashboard y comprobar nuevas lecturas.
+
+Para reiniciar después de editar configuración:
 
 ~~~bash
-journalctl -u monitor-esp32 -n 30 --no-pager
 sudo systemctl restart monitor-esp32
 ~~~
 
-No ejecutar simultáneamente el servicio y otra copia manual. Reiniciar el servicio tras editar configuración. Reiniciar Raspberry ordenadamente cuando no haya actualización activa.
+Para consultar los últimos mensajes:
 
-El servicio arranca el receptor, pero no recupera lecturas perdidas durante un apagado. Flask se utiliza para una práctica local, no como despliegue industrial o servicio público.
+~~~bash
+journalctl -u monitor-esp32 -n 30 --no-pager
+~~~
 
-## Entrega mínima de la muestra
+Los logs describen la operación y los fallos; no son la tabla de mediciones. No ejecutar a la vez el servicio y otra copia manual de app.py.
 
-Sensor real, contrato de mensaje, conexiones, código ESP32/Python, SQLite con datos, consulta explicada, dashboard, trama inválida rechazada, pérdida/reconexión, servicio, logs, informe y demostración individual.
+Finalmente reiniciar Raspberry de forma ordenada y comprobar que el receptor vuelve a recibir sin abrir la terminal. No reiniciar mientras se instalan actualizaciones.
 
-Se mantienen los otros requisitos del proyecto final —placa base, modularidad/FreeRTOS y actuador/indicador— según el alcance acordado; esta práctica no los reemplaza.
+## Evidencias del informe
 
-## Adaptar al proyecto
+Entregar según las condiciones de la tarea:
 
-Cambiar variable, unidad y valor en ESP32, y los mismos campos/rangos en config.json. Conservar mensaje, validación y persistencia. Humedad es un campo complementario opcional.
+1. Diagrama y conexiones identificadas.
+2. Un mensaje real y explicación de sus campos.
+3. Código ESP32 y Python con los cambios del grupo.
+4. Consulta SQLite y registro correspondiente en el dashboard.
+5. Exportación CSV del histórico.
+6. Trama incorrecta rechazada.
+7. Desconexión, reconexión y arranque automático.
+8. Logs relevantes y explicación de las dificultades.
 
-El YF-S201 requiere adaptar su señal antes del ESP32-S3; no conectarlo directamente como sustituto del DHT22. Su factor de caudal es nominal y necesita verificación/calibración.
+Cada conclusión debe señalar **acción, resultado observado y evidencia**. Por ejemplo: “desconectamos USB, el panel cambió de estado y el contador dejó de aumentar; al reconectarlo se añadieron filas nuevas”. Esto no demuestra recuperación de las lecturas perdidas.
 
-## Diagnóstico
+Para obtener una copia consistente de la base mientras se utiliza, se puede usar el método backup de SQLite. Para la entrega habitual basta la exportación CSV y las consultas/capturas indicadas; no borrar archivos auxiliares de una base activa.
 
-| Síntoma | Revisar |
+Se mantienen los demás requisitos del proyecto final, incluidos firmware modular/FreeRTOS y actuador o indicador, según el alcance acordado.
+
+## Revisar problemas frecuentes
+
+| Mensaje o síntoma | Cómo revisarlo |
 |---|---|
-| No hay puerto | Cable de datos, conector, CDC/puente USB-UART y list_ports |
-| Permission denied | Grupo dialout y sesión actualizada |
-| Sin lecturas válidas | DHT, 3,3 V, pull-up, pin y JSON |
-| Tramas rechazadas | Campos, variable/unidad, números y rango |
-| Página no abre | app.py activo, navegador de Raspberry, puerto 5000 libre |
-| Página sin cambios | Conexión, edad del dato y eventos |
-| No guarda | Logs, permisos y espacio disponible |
+| No such file or directory al usar cd | Confirmar ruta, nombre y mayúsculas de la carpeta |
+| No module named flask o serial | Activar .venv e instalar requirements.txt; ejecutar desde esa terminal |
+| No aparece puerto | Comprobar cable, conector de placa y CDC/puente USB-UART |
+| Permission denied | Revisar dialout y actualizar la sesión |
+| ERROR del DHT22 | Revisar módulo, alimentación, pull-up y pin, con corriente desconectada al cambiar cables |
+| Tramas rechazadas | Comparar mensaje con variable, unidad, campos y rango de config.json |
+| Página no abre | Confirmar que app.py corre y que se usa el navegador de Raspberry |
+| Address already in use | Otra aplicación ya utiliza el puerto; revisar servicio o copia manual |
+| Histórico sin datos nuevos | Consultar estado del puerto, antigüedad de lectura y eventos |
+| Error SQLite de escritura | Revisar logs, permisos y espacio disponible |
 
-## Fuentes
+## Referencias
 
-- [Lab 10](../README.md), [Lab 11](../../lab-11-sqlite-dashboard-servicio/README.md).
-- [Cronograma](../../../CRONOGRAMA_2026_2.md), [proyecto final](../../../PROYECTO_FINAL.md).
+- [Marco teórico: SQLite y dashboard](marco-teorico.md).
+- [Instalación de ESP32 en Arduino IDE](https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html).
+- [DHT22](https://learn.adafruit.com/dht/overview) y [pull-up/conexión](https://learn.adafruit.com/dht/connecting-to-a-dhtxx-sensor).
 - [Python sqlite3](https://docs.python.org/3/library/sqlite3.html).
+- [Flask](https://flask.palletsprojects.com/en/stable/quickstart/).
 - [pySerial](https://pyserial.readthedocs.io/en/latest/shortintro.html).
-- [Flask](https://flask.palletsprojects.com/en/stable/installation/).
-- [DHT22](https://learn.adafruit.com/dht/overview), [conexión y pull-up](https://learn.adafruit.com/dht/connecting-to-a-dhtxx-sensor).
-- [ESP32 GPIO](https://docs.espressif.com/projects/arduino-esp32/en/latest/api/gpio.html), [USB CDC](https://docs.espressif.com/projects/arduino-esp32/en/latest/tutorials/cdc_dfu_flash.html).
+- [Laboratorio 10](../README.md), [laboratorio 11](../../lab-11-sqlite-dashboard-servicio/README.md), [proyecto final](../../../PROYECTO_FINAL.md).
