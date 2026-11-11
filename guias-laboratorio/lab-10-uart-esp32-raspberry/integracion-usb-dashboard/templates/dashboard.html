@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monitor del proyecto</title>
+<style>
+  :root{color-scheme:light;font-family:system-ui,sans-serif;color:#17333e;background:#f3f5f1}
+  body{margin:0} main{max-width:1120px;margin:auto;padding:32px 24px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:20px}
+  small{color:#58717a}h1{font-size:32px;margin:5px 0 20px}h2{font-size:19px}
+  .status{border-radius:24px;padding:10px 16px;font-weight:650;background:#e3e8e6}
+  .ok{color:#216b4e;background:#dfefe5}.alerta{color:#795714;background:#f7ebc7}
+  .error{color:#8a352d;background:#fae4dd}.cards{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:16px;margin:24px 0}
+  article,section{background:white;border:1px solid #dde5df;border-radius:16px;padding:22px}
+  .value{font-size:48px;font-weight:700;margin:12px 0}.muted{color:#6f8085}
+  .number{font-size:30px;font-weight:650;margin:17px 0}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:16px}
+  a{color:#216b4e;font-weight:600}
+  canvas{display:block;width:100%;height:290px}
+  table{border-collapse:collapse;width:100%;font-size:14px}
+  th,td{text-align:left;padding:11px 8px;border-bottom:1px solid #edf0ec}
+  #error{color:#8a352d;min-height:24px;margin:12px 0}
+  .table{overflow:auto;margin-top:18px}.foot{font-size:13px;margin-top:16px;color:#58717a}
+  @media(max-width:720px){.cards{grid-template-columns:1fr}header{align-items:flex-start;flex-direction:column}.value{font-size:40px}}
+</style>
+<main>
+  <header>
+    <div><small>ESP32 · RASPBERRY PI · SQLITE</small><h1>Monitor del proyecto</h1></div>
+    <span class="status" id="status" role="status" aria-live="polite">Esperando datos</span>
+  </header>
+  <div id="error" role="alert"></div>
+  <div class="cards">
+    <article><small id="variable">Lectura del sensor</small>
+      <div class="value" id="value">—</div><small id="updated">Sin mediciones</small>
+    </article>
+    <article><small id="extra-title">Humedad relativa</small><div class="number" id="volume">—</div>
+      <small id="extra-description">Última lectura complementaria</small>
+    </article>
+    <article><small>Mediciones guardadas</small><div class="number" id="total">0</div>
+      <small>Histórico de esta variable y unidad</small>
+    </article>
+    <article><small>Tramas rechazadas</small><div class="number" id="invalid">0</div>
+      <small>Durante esta ejecución</small>
+    </article>
+  </div>
+  <section>
+    <div class="row"><h2 id="chart-title">Histórico reciente</h2><a href="/descargar.csv">Descargar CSV</a></div>
+    <canvas id="chart" role="img" aria-label="Gráfica de las últimas 120 mediciones guardadas"></canvas>
+    <small id="range">Las mediciones aparecerán cuando se reciba una trama válida.</small>
+  </section>
+  <section class="table">
+    <h2>Últimos registros</h2>
+    <table><thead><tr><th>Hora de recepción</th><th>Nodo</th><th>Secuencia</th><th>Valor</th><th>Estado</th></tr></thead>
+      <tbody id="rows"></tbody></table>
+  </section>
+  <p class="foot">La última medición se conserva como histórico cuando se pierde la comunicación. Se indica si dejó de ser reciente.</p>
+</main>
+<script>
+const el=id=>document.getElementById(id);
+const number=v=>Number(v).toLocaleString('es-CO',{maximumFractionDigits:3});
+const date=v=>new Date(v).toLocaleString('es-CO');
+let history=[], unit='', gapMs=8000;
+function draw(){
+  const canvas=el('chart'), r=window.devicePixelRatio||1;
+  const width=canvas.clientWidth,height=290;
+  canvas.width=width*r;canvas.height=height*r;
+  const ctx=canvas.getContext('2d');ctx.scale(r,r);ctx.clearRect(0,0,width,height);
+  if(!history.length){ctx.fillStyle='#58717a';ctx.font='16px system-ui';ctx.fillText('Sin registros todavía',24,60);return}
+  const values=history.map(row=>row.valor), times=history.map(row=>Date.parse(row.fecha_hora));
+  let low=Math.min(...values),high=Math.max(...values),pad=(high-low)*.12;
+  if(!pad)pad=Math.max(Math.abs(high)*.05,1);
+  low-=pad;high+=pad;
+  const left=75,right=20,top=20,bottom=40;
+  const x=i=>left+(times[i]-times[0])/(times.at(-1)-times[0]||1)*(width-left-right);
+  const y=v=>height-bottom-(v-low)/(high-low)*(height-top-bottom);
+  ctx.font='12px system-ui';ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){
+    const v=low+(high-low)*i/4,py=y(v);
+    ctx.strokeStyle='#e4ebe5';ctx.beginPath();ctx.moveTo(left,py);ctx.lineTo(width-right,py);ctx.stroke();
+    ctx.fillStyle='#58717a';ctx.textAlign='right';ctx.fillText(number(v),left-10,py+4);
+  }
+  ctx.textAlign='left';ctx.fillText(new Date(times[0]).toLocaleTimeString(),left,height-12);
+  ctx.textAlign='right';ctx.fillText(new Date(times.at(-1)).toLocaleTimeString(),width-right,height-12);
+  // Cortar la línea ante una pausa larga o un reinicio de secuencia.
+  ctx.strokeStyle='#28785a';ctx.lineWidth=2;ctx.beginPath();
+  history.forEach((row,i)=>{if(!i||times[i]-times[i-1]>gapMs||row.nodo!==history[i-1].nodo||row.secuencia<=history[i-1].secuencia)ctx.moveTo(x(i),y(row.valor));else ctx.lineTo(x(i),y(row.valor))});ctx.stroke();
+  history.forEach((row,i)=>{ctx.beginPath();ctx.arc(x(i),y(row.valor),2.8,0,2*Math.PI);ctx.fillStyle='#28785a';ctx.fill()});
+}
+async function update(){
+  try{
+    const response=await fetch('/api/estado',{cache:'no-store',signal:AbortSignal.timeout(5000)});
+    if(!response.ok)throw new Error('No se pudo consultar el receptor');
+    const data=await response.json();history=data.historial;unit=data.unidad;gapMs=data.sin_datos_s*1000;
+    el('variable').textContent=data.variable;
+    el('status').textContent=data.estado;
+    el('status').className='status '+(data.estado==='NORMAL'?'ok':data.estado==='ALERTA'?'alerta':data.estado==='ERROR'?'error':'');
+    el('error').textContent=data.detalle;
+    el('total').textContent=data.total;el('invalid').textContent=data.rechazadas;
+    const humidity=data.ultima?.humedad_pct,volume=data.ultima?.volumen_l;
+    el('extra-title').textContent=humidity!=null?'Humedad relativa':volume!=null?'Volumen acumulado':'Lectura complementaria';
+    el('volume').textContent=humidity!=null?number(humidity)+' %':volume!=null?number(volume)+' L':'—';
+    el('extra-description').textContent=volume!=null&&humidity==null?'Desde el último arranque del ESP32':'Última lectura complementaria';
+    el('value').textContent=data.ultima?number(data.ultima.valor)+' '+unit:'—';
+    el('value').className='value'+(data.fresco?'':' muted');
+    el('updated').textContent=data.ultima?(data.fresco?'Recibido: ':'Último registro histórico: ')+date(data.ultima.fecha_hora):'Sin mediciones';
+    el('chart-title').textContent=data.variable+' · '+unit;
+    el('range').textContent=history.length?'Últimas '+history.length+' mediciones guardadas; el eje horizontal muestra hora de recepción.':'Esperando una lectura real del sensor.';
+    el('rows').replaceChildren(...history.slice(-10).reverse().map(row=>{
+      const tr=document.createElement('tr');
+      for(const value of [date(row.fecha_hora),row.nodo,row.secuencia,number(row.valor)+' '+unit,row.estado]){
+        const td=document.createElement('td');td.textContent=value;tr.appendChild(td);
+      }return tr;
+    }));
+    draw();
+  }catch(error){
+    el('status').textContent='SIN CONEXIÓN CON EL RECEPTOR';el('status').className='status error';
+    el('value').className='value muted';
+    el('error').textContent='No se puede actualizar el dashboard. Revisar si la aplicación sigue ejecutándose.';
+  }finally{setTimeout(update,2000)}
+}
+window.addEventListener('resize',draw);
+update();
+</script>
+</html>
