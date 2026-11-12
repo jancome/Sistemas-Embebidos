@@ -1,5 +1,9 @@
 # Lectura de sensores con ESP32 y Raspberry Pi
 
+**[Descargar los archivos del curso (ZIP)](https://github.com/jancome/Sistemas-Embebidos/archive/refs/heads/main.zip)**
+
+El ZIP contiene el repositorio completo. En el [paso 1](#1-descargar-los-archivos) se indica cuál es la carpeta de esta práctica.
+
 En esta práctica construiremos un monitor de temperatura y humedad. El ESP32 toma la lectura del sensor, la envía por USB y la Raspberry la guarda y la presenta en una página.
 
 Imagina que quieres saber cómo cambia la temperatura del salón durante una jornada. Mirar una cifra ahora no permite recordar lo que ocurrió antes. Vamos a dejar un registro que se pueda revisar después y un panel para ver las últimas lecturas.
@@ -78,15 +82,22 @@ Un sensor suelto de cuatro pines puede requerir una resistencia externa. Revisar
 
 ## 1. Descargar los archivos
 
-Haz la descarga en el computador y también en el navegador **del escritorio de Raspberry**. En ambos, abrir [Sistemas-Embebidos](https://github.com/jancome/Sistemas-Embebidos), pulsar **Code → Download ZIP** y descomprimir. Descargarlo solo en el Mac no lo copia automáticamente a Raspberry.
+Cada grupo puede descargar el material directamente desde GitHub:
 
-Dentro de la carpeta descargada buscar:
+1. Pulsar **[Descargar los archivos del curso (ZIP)](https://github.com/jancome/Sistemas-Embebidos/archive/refs/heads/main.zip)**.
+2. Descomprimir el archivo descargado.
+3. Abrir la carpeta Sistemas-Embebidos-main y seguir esta ruta:
 
 ~~~text
-guias-laboratorio/
-  lab-10-uart-esp32-raspberry/
-    integracion-usb-dashboard/
+Sistemas-Embebidos-main/
+  guias-laboratorio/
+    lab-10-uart-esp32-raspberry/
+      integracion-usb-dashboard/
 ~~~
+
+Esta última carpeta contiene los programas, la guía, el marco teórico, el glosario y las imágenes. El enlace es público: no se necesita acceso al chat del docente. Si ya se descargó una versión anterior, hay que descargar otra vez para obtener los cambios.
+
+Haz la descarga en el computador y también en el navegador **del escritorio de Raspberry**. Descargarlo solo en el Mac o PC no lo copia automáticamente a Raspberry.
 
 Se necesita una copia en el computador para cargar el firmware y otra en Raspberry para ejecutar el receptor.
 
